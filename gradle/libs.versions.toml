@@ -13,6 +13,7 @@ composeBom = "2024.09.00"
 junitJupiter = "5.11.3"
 assertj = "3.26.3"
 glideCompose = "1.0.0-beta01"
+navigationCompose = "2.8.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -34,6 +35,7 @@ junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.r
 assertj-core = { group = "org.assertj", name = "assertj-core", version.ref = "assertj" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 glide-compose = { group = "com.github.bumptech.glide", name = "compose", version.ref = "glideCompose" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
