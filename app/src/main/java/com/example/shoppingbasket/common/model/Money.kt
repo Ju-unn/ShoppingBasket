@@ -8,4 +8,6 @@ value class Money(private val amountWon: Int) {
     }
 
     fun toDisplayValue(): String = MoneyFormatter.format(amountWon)
+
+    fun plus(other: Money): Money = Money(amountWon + other.amountWon)
 }
