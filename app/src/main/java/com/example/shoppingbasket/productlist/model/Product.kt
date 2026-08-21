@@ -5,7 +5,8 @@ import com.example.shoppingbasket.common.model.Money
 data class Product(
     private val id: ProductId,
     private val name: ProductName,
-    private val price: Money
+    private val price: Money,
+    private val imageUrl: ProductImageUrl
 ) {
 
     fun key(): String = id.toKeyValue()
@@ -13,4 +14,6 @@ data class Product(
     fun displayName(): String = name.toDisplayValue()
 
     fun displayPrice(): String = price.toDisplayValue()
+
+    fun displayImageUrl(): String = imageUrl.toDisplayValue()
 }

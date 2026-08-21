@@ -9,12 +9,12 @@ class ProductRepository {
 
     private companion object {
         val MOCK_PRODUCTS = listOf(
-            Product(ProductId("p1"), ProductName("PET보틀-정사각(500ml)"), Money(10_000)),
-            Product(ProductId("p2"), ProductName("PET보틀-밀크티병(500ml)"), Money(12_000)),
-            Product(ProductId("p3"), ProductName("PET보틀-정사각(300ml)"), Money(10_000)),
-            Product(ProductId("p4"), ProductName("PET보틀-납작(2000ml)"), Money(12_000)),
-            Product(ProductId("p5"), ProductName("PET보틀-단지(4000ml)"), Money(10_000)),
-            Product(ProductId("p6"), ProductName("PET보틀-단지(2000ml)"), Money(12_000))
+            Product(ProductId("p1"), ProductName("PET보틀-정사각(500ml)"), Money(10_000), ProductImageUrl("https://picsum.photos/seed/p1/600")),
+            Product(ProductId("p2"), ProductName("PET보틀-밀크티병(500ml)"), Money(12_000), ProductImageUrl("https://picsum.photos/seed/p2/600")),
+            Product(ProductId("p3"), ProductName("PET보틀-정사각(300ml)"), Money(10_000), ProductImageUrl("https://picsum.photos/seed/p3/600")),
+            Product(ProductId("p4"), ProductName("PET보틀-납작(2000ml)"), Money(12_000), ProductImageUrl("https://picsum.photos/seed/p4/600")),
+            Product(ProductId("p5"), ProductName("PET보틀-단지(4000ml)"), Money(10_000), ProductImageUrl("https://picsum.photos/seed/p5/600")),
+            Product(ProductId("p6"), ProductName("PET보틀-단지(2000ml)"), Money(12_000), ProductImageUrl("https://picsum.photos/seed/p6/600"))
         )
     }
 }
