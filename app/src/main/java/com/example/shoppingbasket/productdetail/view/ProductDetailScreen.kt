@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.shoppingbasket.R
+import com.example.shoppingbasket.common.view.ShoppingTopBar
 import com.example.shoppingbasket.productdetail.viewmodel.ProductDetailUiState
 import com.example.shoppingbasket.productlist.model.Product
 
@@ -41,33 +42,23 @@ fun ProductDetailScreen(
 ) {
     val product = uiState.product ?: return
     Column(modifier = modifier.fillMaxSize().background(colorResource(R.color.white))) {
-        ProductDetailTopBar(onClose = onClose)
+        ShoppingTopBar(
+            trailingIcon = {
+                Icon(
+                    painter = painterResource(R.drawable.ic_close),
+                    contentDescription = stringResource(R.string.close_icon_description),
+                    tint = colorResource(R.color.white),
+                    modifier = Modifier
+                        .size(16.dp)
+                        .clickable(onClick = onClose)
+                )
+            }
+        )
         Column(modifier = Modifier.weight(1f)) {
             ProductDetailImage(imageUrl = product.displayImageUrl())
             ProductDetailInfo(product = product)
         }
         AddToCartButton(onClick = onAddToCart)
-    }
-}
-
-@Composable
-private fun ProductDetailTopBar(onClose: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .background(colorResource(R.color.gray_5))
-            .padding(end = 26.dp),
-        contentAlignment = Alignment.CenterEnd
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_close),
-            contentDescription = stringResource(R.string.close_icon_description),
-            tint = colorResource(R.color.white),
-            modifier = Modifier
-                .size(16.dp)
-                .clickable(onClick = onClose)
-        )
     }
 }
 

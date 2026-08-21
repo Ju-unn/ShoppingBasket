@@ -1,6 +1,7 @@
 package com.example.shoppingbasket.productdetail.viewmodel
 
 import com.example.shoppingbasket.basket.model.CartRepository
+import com.example.shoppingbasket.common.fixture.clearCartRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -10,7 +11,7 @@ class ProductDetailViewModelTest {
 
     @BeforeEach
     fun clearCart() {
-        CartRepository.findAll().items().forEach { item -> CartRepository.remove(item.key()) }
+        clearCartRepository()
     }
 
     @Test
