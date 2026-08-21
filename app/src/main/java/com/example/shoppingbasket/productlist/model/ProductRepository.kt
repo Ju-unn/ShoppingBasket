@@ -7,6 +7,8 @@ class ProductRepository {
 
     fun findAll(): ProductList = ProductList(MOCK_PRODUCTS)
 
+    fun findById(id: String): Product? = findAll().items().find { product -> product.key() == id }
+
     private companion object {
         val MOCK_PRODUCTS = listOf(
             Product(ProductId("p1"), ProductName("PET보틀-정사각(500ml)"), Money(10_000), ProductImageUrl("https://picsum.photos/seed/p1/600")),
