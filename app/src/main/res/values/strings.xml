@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ShoppingBasket</string>
+    <string name="product_list_title">Shopping</string>
+    <string name="cart_icon_description">장바구니</string>
 </resources>
