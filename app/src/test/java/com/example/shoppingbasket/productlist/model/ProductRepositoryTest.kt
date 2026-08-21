@@ -14,4 +14,13 @@ class ProductRepositoryTest {
         assertThat(products.isEmpty()).isFalse()
         assertThat(products.items()).hasSize(6)
     }
+
+    @Test
+    @DisplayName("id로 상품을 찾는다")
+    fun findById() {
+        val repository = ProductRepository()
+
+        assertThat(repository.findById("p1")?.key()).isEqualTo("p1")
+        assertThat(repository.findById("없는id")).isNull()
+    }
 }

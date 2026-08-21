@@ -2,6 +2,7 @@ package com.example.shoppingbasket.common.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,8 +18,9 @@ import com.example.shoppingbasket.R
 
 @Composable
 fun ShoppingTopBar(
-    title: String,
     modifier: Modifier = Modifier,
+    title: String? = null,
+    leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: @Composable () -> Unit = {}
 ) {
     Row(
@@ -26,16 +28,21 @@ fun ShoppingTopBar(
             .fillMaxWidth()
             .height(56.dp)
             .background(colorResource(R.color.gray_5))
-            .padding(start = 26.dp, end = 20.dp),
+            .padding(start = if (leadingIcon != null) 11.dp else 26.dp, end = 20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            modifier = Modifier.weight(1f),
-            color = colorResource(R.color.white),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Medium
-        )
+        leadingIcon?.invoke()
+        if (title != null) {
+            Text(
+                text = title,
+                modifier = Modifier.weight(1f),
+                color = colorResource(R.color.white),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium
+            )
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
+        }
         trailingIcon()
     }
 }

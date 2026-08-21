@@ -21,4 +21,10 @@ class MoneyTest {
         assertThatThrownBy { Money(-1) }
             .isInstanceOf(IllegalArgumentException::class.java)
     }
+
+    @Test
+    @DisplayName("다른 금액을 더한 값을 반환한다")
+    fun plus() {
+        assertThat(Money(1_000).plus(Money(2_000))).isEqualTo(Money(3_000))
+    }
 }

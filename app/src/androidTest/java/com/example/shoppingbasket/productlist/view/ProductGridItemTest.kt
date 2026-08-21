@@ -5,6 +5,7 @@ import androidx.compose.ui.test.onNodeWithText
 import com.example.shoppingbasket.common.model.Money
 import com.example.shoppingbasket.productlist.model.Product
 import com.example.shoppingbasket.productlist.model.ProductId
+import com.example.shoppingbasket.productlist.model.ProductImageUrl
 import com.example.shoppingbasket.productlist.model.ProductName
 import org.junit.Rule
 import org.junit.Test
@@ -16,7 +17,12 @@ class ProductGridItemTest {
 
     @Test
     fun displaysNameAndPrice() {
-        val product = Product(ProductId("p1"), ProductName("PET보틀-정사각(500ml)"), Money(10_000))
+        val product = Product(
+            ProductId("p1"),
+            ProductName("PET보틀-정사각(500ml)"),
+            Money(10_000),
+            ProductImageUrl("https://picsum.photos/seed/p1/600")
+        )
 
         composeTestRule.setContent {
             ProductGridItem(product = product)
