@@ -1,7 +1,6 @@
 package com.example.shoppingbasket.productlist.view
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,6 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.shoppingbasket.R
+import com.example.shoppingbasket.common.ext.noRippleClickable
 import com.example.shoppingbasket.common.view.ShoppingTopBar
 import com.example.shoppingbasket.productlist.model.Product
 import com.example.shoppingbasket.productlist.viewmodel.ProductListUiState
@@ -43,7 +43,7 @@ fun ProductListScreen(
                     tint = colorResource(R.color.white),
                     modifier = Modifier
                         .size(24.dp)
-                        .clickable(onClick = onCartClick)
+                        .noRippleClickable(onClick = onCartClick)
                 )
             }
         )
@@ -61,7 +61,7 @@ private fun ProductGrid(products: List<Product>, onProductClick: (String) -> Uni
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(products, key = { product -> product.key() }) { product ->
-            ProductGridItem(product, modifier = Modifier.clickable { onProductClick(product.key()) })
+            ProductGridItem(product, modifier = Modifier.noRippleClickable { onProductClick(product.key()) })
         }
     }
 }

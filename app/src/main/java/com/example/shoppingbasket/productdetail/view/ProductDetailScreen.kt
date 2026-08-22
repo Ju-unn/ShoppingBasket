@@ -1,7 +1,6 @@
 package com.example.shoppingbasket.productdetail.view
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.shoppingbasket.R
+import com.example.shoppingbasket.common.ext.noRippleClickable
 import com.example.shoppingbasket.common.view.ShoppingTopBar
 import com.example.shoppingbasket.productdetail.viewmodel.ProductDetailUiState
 import com.example.shoppingbasket.productlist.model.Product
@@ -50,7 +50,7 @@ fun ProductDetailScreen(
                     tint = colorResource(R.color.white),
                     modifier = Modifier
                         .size(16.dp)
-                        .clickable(onClick = onClose)
+                        .noRippleClickable(onClick = onClose)
                 )
             }
         )
@@ -117,7 +117,7 @@ private fun AddToCartButton(onClick: () -> Unit, modifier: Modifier = Modifier) 
             .fillMaxWidth()
             .height(48.dp)
             .background(colorResource(R.color.primary))
-            .clickable(onClick = onClick),
+            .noRippleClickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Text(

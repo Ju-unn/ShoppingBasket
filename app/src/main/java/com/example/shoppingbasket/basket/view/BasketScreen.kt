@@ -1,7 +1,6 @@
 package com.example.shoppingbasket.basket.view
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.example.shoppingbasket.R
 import com.example.shoppingbasket.basket.model.CartItem
 import com.example.shoppingbasket.basket.viewmodel.BasketUiState
+import com.example.shoppingbasket.common.ext.noRippleClickable
 import com.example.shoppingbasket.common.view.ShoppingTopBar
 
 @Composable
@@ -37,7 +37,7 @@ fun BasketScreen(
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .clickable(onClick = onBack),
+                        .noRippleClickable(onClick = onBack),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

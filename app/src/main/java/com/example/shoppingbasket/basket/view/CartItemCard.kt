@@ -1,7 +1,6 @@
 package com.example.shoppingbasket.basket.view
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +28,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.shoppingbasket.R
 import com.example.shoppingbasket.basket.model.CartItem
+import com.example.shoppingbasket.common.ext.noRippleClickable
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
@@ -72,7 +72,7 @@ fun CartItemCard(cartItem: CartItem, onRemove: () -> Unit, modifier: Modifier = 
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .size(16.dp)
-                .clickable(onClick = onRemove)
+                .noRippleClickable(onClick = onRemove)
         )
     }
 }
