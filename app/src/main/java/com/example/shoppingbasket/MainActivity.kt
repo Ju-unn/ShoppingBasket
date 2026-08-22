@@ -89,6 +89,8 @@ private fun BasketRoute(navController: NavHostController, viewModel: BasketViewM
     BasketScreen(
         uiState = uiState,
         onBack = { navController.popBackStack() },
-        onRemove = { key -> viewModel.remove(key) }
+        onRemove = { key -> viewModel.remove(key) },
+        onPreviousPage = { viewModel.previousPage() },
+        onNextPage = { viewModel.nextPage() }
     )
 }

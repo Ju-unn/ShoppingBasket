@@ -32,4 +32,21 @@ class ClickableModifierTest {
 
         assert(clicked)
     }
+
+    @Test
+    fun doesNotInvokeOnClickWhenDisabled() {
+        var clicked = false
+
+        composeTestRule.setContent {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .testTag("target")
+                    .noRippleClickable(enabled = false) { clicked = true }
+            )
+        }
+        composeTestRule.onNodeWithTag("target").performClick()
+
+        assert(!clicked)
+    }
 }

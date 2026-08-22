@@ -9,4 +9,6 @@
     <string name="back_icon_description">뒤로가기</string>
     <string name="remove_item_description">삭제</string>
     <string name="load_more_button">더보기</string>
+    <string name="paging_previous_button">&lt;</string>
+    <string name="paging_next_button">&gt;</string>
 </resources>
