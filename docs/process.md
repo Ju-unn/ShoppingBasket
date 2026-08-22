@@ -9,7 +9,7 @@
 | 단계 | 화면 | 코드 구현 | pen 디자인 |
 |---|---|---|---|
 | 1단계 | 상품 목록 / 상품 상세 / 장바구니 (기본 흐름) | ✅ 완료 | ✅ 완료 |
-| 2단계 | 상품 목록 더보기(페이지네이션), 장바구니 페이징(5개 이하/초과/마지막 페이지) | ❌ 미착수 | ✅ 이미지·TopBar 정리 완료 |
+| 2단계 | 상품 목록 더보기(페이지네이션), 장바구니 페이징(5개 이하/초과/마지막 페이지) | ✅ 완료 | ✅ 이미지·TopBar 정리 완료 |
 | 3단계 | 수량 조절 (상품목록/상품상세/장바구니에서 +-) | ❌ 미착수 | ✅ 이미지·TopBar 정리 완료 |
 | 4단계 | 최근 본 상품 (목록 하단 섹션 + 상세의 마지막으로 본 상품) | ❌ 미착수 | ✅ 이미지·TopBar 정리 완료 |
 | 5단계 | 로딩 스켈레톤 (상품목록/장바구니) | ❌ 미착수 | ✅ (스켈레톤이라 이미지 자체가 필요 없음) |
@@ -36,6 +36,23 @@
 - 테스트 중복 정리: `common/fixture/`(ProductFixture, CartRepositoryFixture)로 `testProduct()`/`clearCartRepository()` 공용화, 5개 테스트 파일의 중복 제거
 - 전 화면 클릭 요소(`clickable`)에서 리플 애니메이션 제거 (`Modifier.noRippleClickable` 공용 확장 함수 추가)
 
+### 4. 2단계 기능 구현 — 데이터 로딩 (코드)
+- `common/model/Page` : 페이지 좌표 값 객체. `sliceOf` / `next` / `previous` / `hasNextIn` /
+  `hasPrevious` / `coercedIn` / `number`. 상품 목록(20개)과 장바구니(5개)가 크기만 다르게 재사용한다
+- 자르는 로직은 일급 컬렉션(`ProductList` / `CartItems`)의 `sliceBy` / `hasPageAfter` 에 두고,
+  저장소는 `firstPage` / `findPage` / `hasPageAfter` 로 위임만 한다. **페이지 크기는 저장소 내부에 숨겼다**
+  (밖에서 `Page` 를 조립하지 않고 `firstPage()` 를 받아 `next()` 로만 이동)
+- 상품 목록은 **누적**(append) : `ProductListViewModel.loadMore()` 가 다음 페이지를 기존 목록 뒤에 붙인다.
+  마지막 페이지면 아무 일도 하지 않는다
+- 장바구니는 **교체**(replace) : `BasketViewModel.nextPage()` / `previousPage()` 가 현재 페이지만 갈아끼운다.
+  상품을 지워 현재 페이지가 비면 `coercePage` 로 상품이 남아 있는 마지막 페이지로 당긴다
+- `common/view/ShoppingButton` : pen 의 재사용 컴포넌트 `Button` 대응. 더보기 버튼과
+  상품 상세의 "장바구니 담기" 가 공유한다 (중복 구현 제거)
+- `basket/view/CartPagingControl` : pen 의 "장바구니 페이징"(129x42, 버튼 42dp, 색인 45dp).
+  이동할 수 없는 방향은 `gray_border` 로 칠하고 클릭도 막는다. 페이지가 하나뿐이면 렌더링하지 않는다
+- `Modifier.noRippleClickable` 에 `enabled` 파라미터 추가 (기본값 `true`)
+- 브랜치 순서: `feature/common-page`(PR #3) → `feature/productlist-load-more`(PR #4) → `feature/basket-pagination`
+
 ## 결정 사항 (이 프로젝트 한정)
 
 `CLAUDE.md` 는 여러 프로젝트가 공유하는 공통 규칙 문서다. **이 프로젝트에만 해당하는 예외·결정은
@@ -59,19 +76,56 @@ CLAUDE.md 를 고치지 말고 여기에 기록한다.**
   `master` 로 병합한다. `release/*` / `hotfix/*` 는 쓰지 않는다.
 - 브랜치 이름 규칙과 커밋 메시지 규칙(CLAUDE.md 9.1 / 9.2)은 그대로 따른다.
 
+### 3. ViewModel 은 CLAUDE.md 4.7(인스턴스 변수 2개 제한)의 예외로 둔다 (2026-08-22)
+
+- 페이징 상태를 가지는 ViewModel 은 `repository` + 현재 페이지 + `_uiState` / `uiState` 로 최소 4개가 된다.
+  기존 ViewModel 들이 2개를 지킬 수 있었던 건 들고 있을 상태가 없었기 때문이다.
+- `repository` 와 페이지를 별도 객체로 묶는 방법도 검토했지만, 그 객체가 다시 `repository` 를
+  들고 다녀야 해서 **클래스만 늘고 실익이 없다**고 판단해 묶지 않기로 했다.
+- `model/`(Domain) 계층에는 4.7 을 그대로 엄격히 적용한다. 예외는 ViewModel 과 `UiState` 뿐이다.
+
+### 4. 2단계에서 디자인(.pen)과 다르게 구현한 부분 (2026-08-22)
+
+- **더보기 버튼은 pen 에 없다.** `상품 목록 - 더보기`(xkjYE) 프레임은 `상품 목록`(MiJPl) 과
+  아이템 좌표가 완전히 같고(20/186 x 76/294/512) 버튼 노드가 하나도 없다.
+  재사용 컴포넌트 `Button`(높이 48 / primary / 흰색 20sp Bold)을 그리드 마지막 행에
+  한 줄 전체(span)로 넣는 것으로 정했다. 폭은 그리드 좌우 여백(20dp) 안쪽을 채운다.
+- **마지막 페이지의 `>` 를 회색으로 바꿨다.** pen 의 `장바구니 - 마지막 페이지`(YFnu1) 는
+  `>` 가 primary 초록 그대로인데, 1페이지(xsDiH)의 `<` 는 `#AAAAAA` 로 비활성 표시가 돼 있다.
+  비활성 규칙이 한쪽에만 적용된 상태라 양쪽을 맞췄다.
+
+### 5. 목업 상품을 6개에서 50개로 늘렸다 (2026-08-22)
+
+- 페이지 크기가 20이라 기존 6개로는 더보기 버튼이 아예 뜨지 않는다.
+  **20 / 20 / 10** 이 되도록 50개로 정해서, 마지막 페이지가 덜 찬 상태를 실제 화면에서도 확인할 수 있다.
+- 50줄을 하드코딩하지 않고, pen 에 나오는 모양 5종 x 용량 7종 x 가격 2종을 번호로 순환시켜 생성한다.
+  key 가 겹치지 않는다는 것은 `ProductRepositoryTest` 로 고정해 두었다.
+
 ## 다음 단계
 
-**다음 할 일: 2단계 기능 구현.**
+**다음 할 일: 3단계 기능 구현 (수량 조절).**
 
-2단계는 디자인(pen)은 이미 정리돼 있지만, 실제 **기능/프로그래밍 요구사항 스펙**이 아직 없다.
-1단계처럼 "🚀 2단계 - ... / 기능 요구 사항 / 프로그래밍 요구 사항 / 피그마 / 힌트" 형식의
-미션 원문을 받아야 추측 없이 구현을 시작할 수 있다 (CLAUDE.md 3번, 11번 규칙).
+pen 기준 3단계는 상품 목록 / 상품 상세 / 장바구니에서 수량을 +- 로 조절하는 화면이다
+(`상품 목록 - 수량 조절`, `상품 상세 - 수량 조절`, `장바구니 - 수량 조절`, 재사용 컴포넌트 `Stepper`).
+2단계와 마찬가지로 **기능/프로그래밍 요구사항 미션 원문을 받아야** 추측 없이 시작할 수 있다
+(CLAUDE.md 3번, 11번 규칙).
 
-2단계 화면 구성(pen 기준)으로 미뤄보면 다음 기능일 가능성이 높음 — 스펙 받으면 확인 필요:
-- 상품 목록 더보기(스크롤/페이지네이션으로 상품 추가 로딩)
-- 장바구니 페이징 (상품이 5개 이하일 때 / 5개 초과일 때 / 마지막 페이지)
+이미 있는 것: `common/model/Quantity`(1 이상 검증), `CartItems.added()` 의 수량 누적,
+`CartItem.increasedBy()`. 3단계는 여기에 감소·직접 지정과 화면을 붙이는 작업이 될 가능성이 높다.
+
+### 2단계에서 처리하지 않고 남긴 것
+
+- **계측 테스트를 실행하지 못했다.** 에뮬레이터/기기가 없어 `assembleDebugAndroidTest`(컴파일)까지만
+  확인했다. `.\gradlew connectedAndroidTest` 로 한 번 돌려봐야 한다
+- **`BasketViewModel` 이 `CartRepository` 싱글턴을 직접 참조한다.** `ProductListViewModel` 은
+  생성자 주입인데 일관성이 없고, 테스트마다 `clearCartRepository()` 로 전역 상태를 청소해야 한다
+- **`common/fixture/ProductFixture.kt` 는 주석과 달리 `src/test` 에서만 쓸 수 있다.**
+  androidTest 는 별도 소스셋이라 계측 테스트들이 각자 `Product(...)` 를 인라인으로 만들고 있다
+- **androidTest 에 AssertJ 가 없어 raw `assert()` 를 쓰고 있다.** CLAUDE.md 8.1 은 계측 테스트에도
+  AssertJ 를 권하지만 `androidTestImplementation` 에 빠져 있다 (의존성 추가는 사용자 확인 필요)
 
 **작업 방식(변하지 않는 원칙)**
 - 한 번에 한 단계만 진행하고 사용자 검토를 받는다
 - 단계가 끝나면 커밋 메시지 초안을 제안한다 (Claude는 직접 commit/push 하지 않음)
 - 화면 작업 전 Pencil 디자인을 먼저 확인한다
+- 한 브랜치에는 한 기능만 담는다. 계층(ViewModel/View)이 아니라 기능 단위로 자른다
