@@ -29,6 +29,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.shoppingbasket.R
 import com.example.shoppingbasket.common.ext.noRippleClickable
+import com.example.shoppingbasket.common.view.ShoppingButton
 import com.example.shoppingbasket.common.view.ShoppingTopBar
 import com.example.shoppingbasket.productdetail.viewmodel.ProductDetailUiState
 import com.example.shoppingbasket.productlist.model.Product
@@ -112,19 +113,9 @@ private fun PriceRow(displayPrice: String, modifier: Modifier = Modifier) {
 
 @Composable
 private fun AddToCartButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
+    ShoppingButton(
+        text = stringResource(R.string.add_to_cart_button),
+        onClick = onClick,
         modifier = modifier
-            .fillMaxWidth()
-            .height(48.dp)
-            .background(colorResource(R.color.primary))
-            .noRippleClickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = stringResource(R.string.add_to_cart_button),
-            color = colorResource(R.color.white),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
+    )
 }

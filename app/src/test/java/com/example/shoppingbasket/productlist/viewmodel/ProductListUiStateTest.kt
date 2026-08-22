@@ -11,4 +11,10 @@ class ProductListUiStateTest {
     fun defaultState() {
         assertThat(ProductListUiState().products).isEmpty()
     }
+
+    @Test
+    @DisplayName("기본 상태에서는 더보기가 불가능하다")
+    fun defaultCannotLoadMore() {
+        assertThat(ProductListUiState().canLoadMore).isFalse()
+    }
 }

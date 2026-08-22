@@ -65,7 +65,8 @@ private fun ProductListRoute(navController: NavHostController, viewModel: Produc
     ProductListScreen(
         uiState = uiState,
         onProductClick = { productId -> navController.navigate("productDetail/$productId") },
-        onCartClick = { navController.navigate(ROUTE_BASKET) }
+        onCartClick = { navController.navigate(ROUTE_BASKET) },
+        onLoadMore = { viewModel.loadMore() }
     )
 }
 

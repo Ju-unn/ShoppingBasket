@@ -1,5 +1,6 @@
 package com.example.shoppingbasket.productlist.view
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -19,20 +20,7 @@ class ProductListScreenTest {
 
     @Test
     fun displaysTopBarAndProducts() {
-        val uiState = ProductListUiState(
-            products = listOf(
-                Product(
-                    ProductId("p1"),
-                    ProductName("PET보틀-정사각(500ml)"),
-                    Money(10_000),
-                    ProductImageUrl("https://picsum.photos/seed/p1/600")
-                )
-            )
-        )
-
-        composeTestRule.setContent {
-            ProductListScreen(uiState = uiState, onProductClick = {}, onCartClick = {})
-        }
+        setScreen(ProductListUiState(products = listOf(testProduct())))
 
         composeTestRule.onNodeWithText("Shopping").assertExists()
         composeTestRule.onNodeWithText("PET보틀-정사각(500ml)").assertExists()
@@ -42,26 +30,62 @@ class ProductListScreenTest {
     @Test
     fun clickingProductInvokesCallbackWithKey() {
         var clickedKey: String? = null
-        val uiState = ProductListUiState(
-            products = listOf(
-                Product(
-                    ProductId("p1"),
-                    ProductName("PET보틀-정사각(500ml)"),
-                    Money(10_000),
-                    ProductImageUrl("https://picsum.photos/seed/p1/600")
-                )
-            )
+        setScreen(
+            uiState = ProductListUiState(products = listOf(testProduct())),
+            onProductClick = { key -> clickedKey = key }
         )
 
-        composeTestRule.setContent {
-            ProductListScreen(
-                uiState = uiState,
-                onProductClick = { key -> clickedKey = key },
-                onCartClick = {}
-            )
-        }
         composeTestRule.onNodeWithText("PET보틀-정사각(500ml)").performClick()
 
         assert(clickedKey == "p1")
     }
+
+    @Test
+    fun displaysLoadMoreButtonWhenMorePagesRemain() {
+        setScreen(ProductListUiState(products = listOf(testProduct()), canLoadMore = true))
+
+        composeTestRule.onNodeWithText("더보기").assertIsDisplayed()
+    }
+
+    @Test
+    fun hidesLoadMoreButtonOnLastPage() {
+        setScreen(ProductListUiState(products = listOf(testProduct()), canLoadMore = false))
+
+        composeTestRule.onNodeWithText("더보기").assertDoesNotExist()
+    }
+
+    @Test
+    fun clickingLoadMoreInvokesCallback() {
+        var loadMoreCalled = false
+        setScreen(
+            uiState = ProductListUiState(products = listOf(testProduct()), canLoadMore = true),
+            onLoadMore = { loadMoreCalled = true }
+        )
+
+        composeTestRule.onNodeWithText("더보기").performClick()
+
+        assert(loadMoreCalled)
+    }
+
+    private fun setScreen(
+        uiState: ProductListUiState,
+        onProductClick: (String) -> Unit = {},
+        onLoadMore: () -> Unit = {}
+    ) {
+        composeTestRule.setContent {
+            ProductListScreen(
+                uiState = uiState,
+                onProductClick = onProductClick,
+                onCartClick = {},
+                onLoadMore = onLoadMore
+            )
+        }
+    }
+
+    private fun testProduct(): Product = Product(
+        ProductId("p1"),
+        ProductName("PET보틀-정사각(500ml)"),
+        Money(10_000),
+        ProductImageUrl("https://picsum.photos/seed/p1/600")
+    )
 }
