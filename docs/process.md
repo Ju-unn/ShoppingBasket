@@ -53,6 +53,15 @@
 - `Modifier.noRippleClickable` 에 `enabled` 파라미터 추가 (기본값 `true`)
 - 브랜치 순서: `feature/common-page`(PR #3) → `feature/productlist-load-more`(PR #4) → `feature/basket-pagination`
 
+### 5. CartRepository 를 주입 가능한 클래스로 전환 (3단계 준비, 2026-08-22)
+
+- `object CartRepository` → `class CartRepository`. 인스턴스는 `ShoppingBasketApplication` 이 보관한다
+  (Activity 에 두면 화면 회전 시 장바구니가 사라진다). `AndroidManifest.xml` 에 `android:name` 추가
+- `MainActivity` 의 ViewModel 팩토리가 `CreationExtras` 의 `APPLICATION_KEY` 로 저장소를 꺼내 주입한다
+- `BasketViewModel` / `ProductDetailViewModel` 이 생성자로 저장소를 받는다
+- 테스트가 각자 새 저장소를 만들어 쓰게 되어 **전역 상태 청소(`CartRepositoryFixture`)를 삭제**했다
+- `ShoppingBasketApplicationTest` 추가 (계측 31 → 33개)
+
 ## 결정 사항 (이 프로젝트 한정)
 
 `CLAUDE.md` 는 여러 프로젝트가 공유하는 공통 규칙 문서다. **이 프로젝트에만 해당하는 예외·결정은
@@ -101,31 +110,136 @@ CLAUDE.md 를 고치지 말고 여기에 기록한다.**
 - 50줄을 하드코딩하지 않고, pen 에 나오는 모양 5종 x 용량 7종 x 가격 2종을 번호로 순환시켜 생성한다.
   key 가 겹치지 않는다는 것은 `ProductRepositoryTest` 로 고정해 두었다.
 
+### 6. 3단계 설계 결정 (2026-08-22, 사용자 확정)
+
+3단계 미션 원문을 받고 6가지를 물어 아래로 확정했다.
+
+| # | 쟁점 | 결정 |
+|---|---|---|
+| 1 | pen 안에 Stepper 정의가 2개(재사용 컴포넌트 vs 화면 프레임)라 모순 | **재사용 컴포넌트 `Stepper`(jxIE5) 기준** |
+| 2 | 수량 1에서 `−` 를 누르면? | **장바구니에서 제거하고 `+` 버튼으로 되돌린다** (B마트 UX) |
+| 3 | 상단바 장바구니 배지 숫자 | **총 수량** (상품 종류 수 아님) |
+| 4 | 화면 간 수량 동기화 방식 | **저장소에 리스너 등록** (ViewModel 이 구독, `onCleared` 에서 해제) |
+| 5 | 상품 상세의 `+` `−` 가 즉시 반영되나? | **아니다.** 상세는 로컬 수량이고 `장바구니 담기` 를 눌러야 반영 |
+| 6 | `CartRepository` 를 `class` 로? | **전환함** (위 "지금까지 한 일" 5번에서 완료) |
+
+**4번이 3단계의 핵심이다.** 기능 요구사항이 "목록↔장바구니 양방향 반영"을 요구하는데,
+`CartRepository` 가 관찰 불가능한 상태라 지금 구조로는 안 된다. 코루틴을 미뤘으므로(결정 1번)
+`StateFlow` 를 못 쓰고, 대신 도메인에 직접 만든 리스너를 둔다. 나중에 코루틴을 도입할 때
+이 리스너를 `StateFlow` 로 갈아끼우면 된다.
+
+**미션 힌트의 Activity Result API 는 쓰지 않는다.** 다중 Activity + XML 전제의 해법이고,
+이 프로젝트는 단일 Activity + Navigation Compose 라 공유 저장소가 그 자리를 대신한다.
+
 ## 다음 단계
 
-**다음 할 일: 3단계 기능 구현 (수량 조절).**
+### 지금 상태 (2026-08-22 기준) ⚠️ 이어받을 때 먼저 확인할 것
 
-pen 기준 3단계는 상품 목록 / 상품 상세 / 장바구니에서 수량을 +- 로 조절하는 화면이다
-(`상품 목록 - 수량 조절`, `상품 상세 - 수량 조절`, `장바구니 - 수량 조절`, 재사용 컴포넌트 `Stepper`).
-2단계와 마찬가지로 **기능/프로그래밍 요구사항 미션 원문을 받아야** 추측 없이 시작할 수 있다
-(CLAUDE.md 3번, 11번 규칙).
+| 브랜치 | 상태 |
+|---|---|
+| `master` | `01f34ee` (PR #6 머지됨). origin 과 동일 |
+| `refactor/cart-repository-injection` | **작업 완료 · 커밋/푸시 전.** 위 "지금까지 한 일" 5번 내용이 여기 들어 있다 |
+| `feature/basket-quantity-model` | 만들어만 두고 비어 있음 (`master` 와 동일). 위 리팩터링이 머지된 뒤 여기서 이어간다 |
 
-이미 있는 것: `common/model/Quantity`(1 이상 검증), `CartItems.added()` 의 수량 누적,
-`CartItem.increasedBy()`. 3단계는 여기에 감소·직접 지정과 화면을 붙이는 작업이 될 가능성이 높다.
+**다른 기기에서 이어가려면 `refactor/cart-repository-injection` 을 먼저 커밋·푸시해야 한다.**
+커밋 메시지 초안:
 
-### 2단계에서 처리하지 않고 남긴 것
+```
+refactor(basket): CartRepository 를 주입 가능한 클래스로 전환
 
-- **계측 테스트를 실행하지 못했다.** 에뮬레이터/기기가 없어 `assembleDebugAndroidTest`(컴파일)까지만
-  확인했다. `.\gradlew connectedAndroidTest` 로 한 번 돌려봐야 한다
-- **`BasketViewModel` 이 `CartRepository` 싱글턴을 직접 참조한다.** `ProductListViewModel` 은
-  생성자 주입인데 일관성이 없고, 테스트마다 `clearCartRepository()` 로 전역 상태를 청소해야 한다
-- **`common/fixture/ProductFixture.kt` 는 주석과 달리 `src/test` 에서만 쓸 수 있다.**
+- object 싱글턴을 class 로 바꾸고 ShoppingBasketApplication 이 인스턴스를 보관
+- BasketViewModel / ProductDetailViewModel 이 생성자로 저장소를 주입받도록 변경
+- 테스트가 각자 새 저장소를 쓰게 되어 전역 상태 청소(CartRepositoryFixture) 제거
+- ShoppingBasketApplicationTest 추가 (계측 31 -> 33개)
+```
+
+검증 결과: 단위 102개 + 계측 33개 전부 통과, `lintDebug` Error 0.
+
+### 3단계 브랜치 계획 (5개)
+
+2단계와 같은 순서(도메인 → 공용 뷰 → 화면별)이고 각각 PR 하나다.
+
+| # | 브랜치 | 내용 |
+|---|---|---|
+| 1 | `feature/basket-quantity-model` | 도메인. 수량 증감/조회 + 변경 리스너 |
+| 2 | `feature/common-stepper` | 공용 `Stepper` 컴포저블 (**프로그래밍 요구사항 "반복되는 뷰 재활용"**) |
+| 3 | `feature/productlist-quantity` | 목록 `+` ↔ Stepper 전환, 상단바 총 수량 배지 |
+| 4 | `feature/productdetail-quantity` | 상세 수량 조절 + 총액 반영 |
+| 5 | `feature/basket-quantity-ui` | 장바구니 카드 안 Stepper |
+
+**1번 브랜치에서 할 일:**
+
+```kotlin
+// common/model/Quantity.kt
+fun decreased(): Quantity        // 1 밑으로는 못 내려감
+fun isMinimum(): Boolean
+
+// basket/model/CartItems.kt
+fun increase(key: String): CartItems
+fun decrease(key: String): CartItems
+fun quantityOf(product: Product): Quantity?   // null = 장바구니에 없음
+fun totalQuantity(): Int                      // 상단바 배지용
+
+// basket/model/CartRepository.kt
+fun increase(key: String) / decrease(key: String)
++ 변경 리스너 등록/해제 (결정 6-4번)
+```
+
+`Quantity` 는 `require(value >= 1)` 이라 0을 표현할 수 없다. 이 제약은 **유지**하고
+"장바구니에 없음"은 `quantityOf()` 가 `null` 을 돌려주는 것으로 구분한다.
+(`Quantity(0)` 을 허용하면 "0개짜리 장바구니 항목"이라는 말이 안 되는 상태가 생긴다.)
+
+### 3단계 pen 스펙 (측정값)
+
+**재사용 컴포넌트 `Stepper`(jxIE5)** — 결정 6-1번에 따라 이쪽을 따른다
+
+- 126×42, 흰 배경, `gray-border` 1px 테두리, corner 4
+- `−` Material `remove` 아이콘 20dp `gray5` at (10,11)
+- 수량 텍스트 16sp **Bold** `black`, 중앙 (x57)
+- `+` Material `add` 아이콘 20dp **`primary`** at (96,11)
+- `ProductItem` / `CartItem` 컴포넌트는 100×28 로 축소해 참조한다 (아이콘 16dp, 수량 14sp)
+
+**상품 목록**(I8FRa) — 아이템 154×206, 사진 154×154
+
+| 상태 | 표현 |
+|---|---|
+| 장바구니에 없음 | `Plus` 원 **48dp** at (98,98). 흰 원 + `#555555` 선 2개(굵기 3, round cap). 사진 우하단 8dp |
+| 담겨 있음 | Stepper **126×42** at (14,104). 사진 하단 중앙(좌우 14dp, 아래 8dp) |
+
+**상단바 배지**(UFS8q): `primary` 원 **20dp** + 흰색 **14sp** Medium 숫자.
+배지 자리를 만들려고 장바구니 아이콘이 왼쪽으로 24dp 밀려 있다.
+
+**상품 상세**(C1TfD): Stepper at (220,495) — 가격 행 오른쪽.
+1단계에 있던 `"가격"` 라벨이 사라지고 **금액만** 남는다. 금액은 `30,000원` = 10,000 × 3 →
+**수량이 곱해진 총액**. 하단 `장바구니 담기` 버튼(360×48)은 그대로.
+
+**장바구니**(YZEbS): 카드 324×152, Stepper at (186,60) — 카드 안 우측 하단.
+
+### 검토가 필요한 지점
+
+1. **`ShoppingBasketApplication.cartRepository` 가 public `val` 이다.**
+   CLAUDE.md 4.9(프로퍼티 노출 금지)에 걸리지만 Domain 이 아니라 프레임워크/DI 계층이라 예외로 뒀다.
+   함수로 바꿀지 결정 필요
+2. **계측 테스트가 여전히 raw `assert()` 를 쓴다.** AssertJ 가 `androidTestImplementation` 에 없다.
+   의존성 추가는 사용자 승인이 필요해 손대지 않았다 (아래 "남긴 것" 과 같은 항목)
+3. **결정 6-1번(재사용 컴포넌트 기준)의 부작용**: 상세 화면에서 Stepper 가 흰 배경 위에 놓이는데,
+   컴포넌트에 `gray-border` 테두리가 있어 다행히 보인다. 다만 화면 프레임 쪽 디자인(테두리 없음,
+   22sp 회색)과 실제 화면이 달라 보이게 되므로, 구현 후 눈으로 한 번 확인이 필요하다
+4. **결정 6-2번(수량 1에서 제거)은 pen 에 없는 동작이다.** 미션의 "B마트 UX 참고" 를 근거로 정했다
+
+### 아직 남긴 것 (2단계에서 이월)
+
+- **`common/fixture/ProductFixture.kt` 는 `src/test` 에서만 쓸 수 있다.**
   androidTest 는 별도 소스셋이라 계측 테스트들이 각자 `Product(...)` 를 인라인으로 만들고 있다
 - **androidTest 에 AssertJ 가 없어 raw `assert()` 를 쓰고 있다.** CLAUDE.md 8.1 은 계측 테스트에도
   AssertJ 를 권하지만 `androidTestImplementation` 에 빠져 있다 (의존성 추가는 사용자 확인 필요)
+- ~~계측 테스트를 실행하지 못했다~~ → **해결됨.** 에뮬레이터(`Medium_Phone_API_36`)에서 33개 통과
+- ~~`BasketViewModel` 이 `CartRepository` 싱글턴을 직접 참조한다~~ → **해결됨** (지금까지 한 일 5번)
 
 **작업 방식(변하지 않는 원칙)**
 - 한 번에 한 단계만 진행하고 사용자 검토를 받는다
 - 단계가 끝나면 커밋 메시지 초안을 제안한다 (Claude는 직접 commit/push 하지 않음)
 - 화면 작업 전 Pencil 디자인을 먼저 확인한다
 - 한 브랜치에는 한 기능만 담는다. 계층(ViewModel/View)이 아니라 기능 단위로 자른다
+- 빌드/테스트는 `.\gradlew testDebugUnitTest connectedDebugAndroidTest` 로 확인한다
+  (`.\gradlew test --tests` 는 Android 에서 동작하지 않는다)
