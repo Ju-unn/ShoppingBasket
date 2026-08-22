@@ -112,6 +112,67 @@ class CartItemsTest {
         assertThat(CartItems(emptyList()).coercePage(thirdPage).number()).isEqualTo(1)
     }
 
+    @Test
+    @DisplayName("key로 상품 수량을 늘린다")
+    fun increase() {
+        val cartItems = CartItems(emptyList())
+            .added(testProduct("p1", 10_000))
+            .increase("p1")
+
+        assertThat(cartItems.items().first().displayQuantity()).isEqualTo("2")
+    }
+
+    @Test
+    @DisplayName("수량이 2 이상이면 하나 줄인다")
+    fun decreaseAboveMinimum() {
+        val cartItems = CartItems(emptyList())
+            .added(testProduct("p1", 10_000), Quantity(2))
+            .decrease("p1")
+
+        assertThat(cartItems.items().first().displayQuantity()).isEqualTo("1")
+    }
+
+    @Test
+    @DisplayName("수량이 1일 때 줄이면 장바구니에서 제거한다")
+    fun decreaseAtMinimumRemovesItem() {
+        val cartItems = CartItems(emptyList())
+            .added(testProduct("p1", 10_000))
+            .decrease("p1")
+
+        assertThat(cartItems.isEmpty()).isTrue()
+    }
+
+    @Test
+    @DisplayName("담긴 상품의 수량을 조회한다")
+    fun quantityOfPresentProduct() {
+        val product = testProduct("p1", 10_000)
+        val cartItems = CartItems(emptyList()).added(product, Quantity(3))
+
+        assertThat(cartItems.quantityOf(product)).isEqualTo(Quantity(3))
+    }
+
+    @Test
+    @DisplayName("담기지 않은 상품은 null을 반환한다")
+    fun quantityOfAbsentProduct() {
+        assertThat(CartItems(emptyList()).quantityOf(testProduct("p1", 10_000))).isNull()
+    }
+
+    @Test
+    @DisplayName("장바구니가 비어 있으면 총 수량은 0이다")
+    fun totalQuantityDisplayValueWhenEmpty() {
+        assertThat(CartItems(emptyList()).totalQuantityDisplayValue()).isEqualTo("0")
+    }
+
+    @Test
+    @DisplayName("담긴 상품들의 수량을 모두 더한다")
+    fun totalQuantityDisplayValue() {
+        val cartItems = CartItems(emptyList())
+            .added(testProduct("p1", 10_000), Quantity(2))
+            .added(testProduct("p2", 5_000), Quantity(3))
+
+        assertThat(cartItems.totalQuantityDisplayValue()).isEqualTo("5")
+    }
+
     private fun cartItemsOf(count: Int): CartItems {
         return (1..count).fold(CartItems(emptyList())) { cartItems, number ->
             cartItems.added(testProduct("p$number"))

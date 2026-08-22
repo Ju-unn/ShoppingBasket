@@ -31,4 +31,24 @@ class QuantityTest {
     fun increasedBy() {
         assertThat(Quantity(2).increasedBy(Quantity(3))).isEqualTo(Quantity(5))
     }
+
+    @Test
+    @DisplayName("1을 줄인 값을 반환한다")
+    fun decreased() {
+        assertThat(Quantity(2).decreased()).isEqualTo(Quantity(1))
+    }
+
+    @Test
+    @DisplayName("최소 수량(1)에서는 줄일 수 없다")
+    fun rejectsDecreasingBelowMinimum() {
+        assertThatThrownBy { Quantity(1).decreased() }
+            .isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @Test
+    @DisplayName("최소 수량 여부를 판단한다")
+    fun isMinimum() {
+        assertThat(Quantity(1).isMinimum()).isTrue()
+        assertThat(Quantity(2).isMinimum()).isFalse()
+    }
 }

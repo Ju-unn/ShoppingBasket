@@ -23,5 +23,11 @@ data class CartItem(
 
     fun increasedBy(amount: Quantity): CartItem = CartItem(product, quantity.increasedBy(amount))
 
+    fun decreased(): CartItem = CartItem(product, quantity.decreased())
+
+    fun isMinimumQuantity(): Boolean = quantity.isMinimum()
+
+    fun currentQuantity(): Quantity = quantity
+
     fun accumulate(total: Money): Money = total.plus(product.priceFor(quantity))
 }
