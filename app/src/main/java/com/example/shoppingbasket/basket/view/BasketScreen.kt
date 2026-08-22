@@ -12,13 +12,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.shoppingbasket.R
 import com.example.shoppingbasket.basket.model.CartItem
 import com.example.shoppingbasket.basket.viewmodel.BasketUiState
@@ -27,6 +30,9 @@ import com.example.shoppingbasket.common.view.ShoppingTopBar
 
 // 디자인(.pen) 기준 페이징 컨트롤은 화면 아래에서 50dp 띄워 가운데 놓는다
 private val PAGING_BOTTOM_MARGIN = 50.dp
+
+// 빈 장바구니 안내는 pen 에 대응 프레임이 없어 기존 타이포(상품명 18sp)와 gray_5 를 그대로 따랐다
+private val EMPTY_MESSAGE_SIZE = 18.sp
 
 @Composable
 fun BasketScreen(
@@ -56,7 +62,7 @@ fun BasketScreen(
                 }
             }
         )
-        CartItemList(cartItems = uiState.cartItems, onRemove = onRemove, modifier = Modifier.weight(1f))
+        CartContent(cartItems = uiState.cartItems, onRemove = onRemove, modifier = Modifier.weight(1f))
         PagingArea(uiState = uiState, onPreviousPage = onPreviousPage, onNextPage = onNextPage)
     }
 }
@@ -77,6 +83,28 @@ private fun ColumnScope.PagingArea(uiState: BasketUiState, onPreviousPage: () ->
             .align(Alignment.CenterHorizontally)
             .padding(bottom = PAGING_BOTTOM_MARGIN)
     )
+}
+
+// 담긴 상품이 없으면 목록 대신 안내 문구를 보여준다
+@Composable
+private fun CartContent(cartItems: List<CartItem>, onRemove: (String) -> Unit, modifier: Modifier = Modifier) {
+    if (cartItems.isEmpty()) {
+        EmptyCartMessage(modifier = modifier)
+        return
+    }
+    CartItemList(cartItems = cartItems, onRemove = onRemove, modifier = modifier)
+}
+
+@Composable
+private fun EmptyCartMessage(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(
+            text = stringResource(R.string.empty_cart_message),
+            color = colorResource(R.color.gray_5),
+            fontSize = EMPTY_MESSAGE_SIZE,
+            fontWeight = FontWeight.Medium
+        )
+    }
 }
 
 @Composable
