@@ -1,35 +1,31 @@
 package com.example.shoppingbasket.basket.model
 
-import com.example.shoppingbasket.common.fixture.clearCartRepository
 import com.example.shoppingbasket.common.fixture.testProduct
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 class CartRepositoryTest {
 
-    @BeforeEach
-    fun clearRepository() {
-        clearCartRepository()
-    }
+    // JUnit5 는 테스트마다 클래스를 새로 만들므로 저장소도 테스트마다 비어 있는 상태로 시작한다
+    private val repository = CartRepository()
 
     @Test
     @DisplayName("상품을 추가하면 조회 결과에 반영된다")
     fun add() {
-        CartRepository.add(testProduct("p1", 10_000))
+        repository.add(testProduct("p1", 10_000))
 
-        assertThat(CartRepository.findAll().items()).hasSize(1)
+        assertThat(repository.findAll().items()).hasSize(1)
     }
 
     @Test
     @DisplayName("key로 상품을 제거하면 조회 결과에서 사라진다")
     fun remove() {
-        CartRepository.add(testProduct("p1", 10_000))
+        repository.add(testProduct("p1", 10_000))
 
-        CartRepository.remove("p1")
+        repository.remove("p1")
 
-        assertThat(CartRepository.findAll().isEmpty()).isTrue()
+        assertThat(repository.findAll().isEmpty()).isTrue()
     }
 
     @Test
@@ -37,7 +33,7 @@ class CartRepositoryTest {
     fun findFirstPage() {
         addProducts(8)
 
-        val firstPage = CartRepository.findPage(CartRepository.firstPage())
+        val firstPage = repository.findPage(repository.firstPage())
 
         assertThat(firstPage.items()).hasSize(5)
     }
@@ -47,7 +43,7 @@ class CartRepositoryTest {
     fun findLastPage() {
         addProducts(8)
 
-        val lastPage = CartRepository.findPage(CartRepository.firstPage().next())
+        val lastPage = repository.findPage(repository.firstPage().next())
 
         assertThat(lastPage.items()).hasSize(3)
     }
@@ -57,7 +53,7 @@ class CartRepositoryTest {
     fun hasNoPageAfterWhenSinglePage() {
         addProducts(5)
 
-        assertThat(CartRepository.hasPageAfter(CartRepository.firstPage())).isFalse()
+        assertThat(repository.hasPageAfter(repository.firstPage())).isFalse()
     }
 
     @Test
@@ -65,21 +61,21 @@ class CartRepositoryTest {
     fun hasPageAfterWhenOverflowing() {
         addProducts(6)
 
-        assertThat(CartRepository.hasPageAfter(CartRepository.firstPage())).isTrue()
+        assertThat(repository.hasPageAfter(repository.firstPage())).isTrue()
     }
 
     @Test
     @DisplayName("마지막 페이지의 상품을 모두 지우면 이전 페이지로 당긴다")
     fun coercePageAfterRemovingLastPage() {
         addProducts(6)
-        val secondPage = CartRepository.firstPage().next()
+        val secondPage = repository.firstPage().next()
 
-        CartRepository.remove("p6")
+        repository.remove("p6")
 
-        assertThat(CartRepository.coercePage(secondPage).number()).isEqualTo(1)
+        assertThat(repository.coercePage(secondPage).number()).isEqualTo(1)
     }
 
     private fun addProducts(count: Int) {
-        (1..count).forEach { number -> CartRepository.add(testProduct("p$number")) }
+        (1..count).forEach { number -> repository.add(testProduct("p$number")) }
     }
 }

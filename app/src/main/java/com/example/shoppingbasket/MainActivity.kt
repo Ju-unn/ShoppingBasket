@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -15,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.shoppingbasket.basket.model.CartRepository
 import com.example.shoppingbasket.basket.view.BasketScreen
 import com.example.shoppingbasket.basket.viewmodel.BasketViewModel
 import com.example.shoppingbasket.productdetail.view.ProductDetailScreen
@@ -73,7 +76,9 @@ private fun ProductListRoute(navController: NavHostController, viewModel: Produc
 @Composable
 private fun ProductDetailRoute(productId: String, navController: NavHostController) {
     val viewModel: ProductDetailViewModel = viewModel(
-        factory = viewModelFactory { initializer { ProductDetailViewModel(productId) } }
+        factory = viewModelFactory {
+            initializer { ProductDetailViewModel(productId, cartRepository()) }
+        }
     )
     val uiState by viewModel.uiState
     ProductDetailScreen(
@@ -84,7 +89,10 @@ private fun ProductDetailRoute(productId: String, navController: NavHostControll
 }
 
 @Composable
-private fun BasketRoute(navController: NavHostController, viewModel: BasketViewModel = viewModel()) {
+private fun BasketRoute(navController: NavHostController) {
+    val viewModel: BasketViewModel = viewModel(
+        factory = viewModelFactory { initializer { BasketViewModel(cartRepository()) } }
+    )
     val uiState by viewModel.uiState
     BasketScreen(
         uiState = uiState,
@@ -93,4 +101,10 @@ private fun BasketRoute(navController: NavHostController, viewModel: BasketViewM
         onPreviousPage = { viewModel.previousPage() },
         onNextPage = { viewModel.nextPage() }
     )
+}
+
+// ViewModel 팩토리 안에서 Application 이 들고 있는 공용 장바구니 저장소를 꺼낸다
+private fun CreationExtras.cartRepository(): CartRepository {
+    val application = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
+    return (application as ShoppingBasketApplication).cartRepository
 }
