@@ -1,5 +1,6 @@
 package com.example.shoppingbasket.basket.view
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -22,11 +23,7 @@ class BasketScreenTest {
 
     @Test
     fun displaysTitleAndCartItems() {
-        val uiState = BasketUiState(cartItems = listOf(testCartItem("p1")))
-
-        composeTestRule.setContent {
-            BasketScreen(uiState = uiState, onBack = {}, onRemove = {})
-        }
+        setScreen(BasketUiState(cartItems = listOf(testCartItem("p1"))))
 
         composeTestRule.onNodeWithText("Cart").assertExists()
         composeTestRule.onNodeWithText("PET보틀-정사각(500ml)").assertExists()
@@ -35,14 +32,75 @@ class BasketScreenTest {
     @Test
     fun clickingRemoveInvokesCallbackWithKey() {
         var removedKey: String? = null
-        val uiState = BasketUiState(cartItems = listOf(testCartItem("p1")))
+        setScreen(
+            uiState = BasketUiState(cartItems = listOf(testCartItem("p1"))),
+            onRemove = { key -> removedKey = key }
+        )
 
-        composeTestRule.setContent {
-            BasketScreen(uiState = uiState, onBack = {}, onRemove = { key -> removedKey = key })
-        }
         composeTestRule.onNodeWithContentDescription("삭제").performClick()
 
         assert(removedKey == "p1")
+    }
+
+    @Test
+    fun hidesPagingControlWhenSinglePage() {
+        setScreen(BasketUiState(cartItems = listOf(testCartItem("p1"))))
+
+        composeTestRule.onNodeWithText("<").assertDoesNotExist()
+        composeTestRule.onNodeWithText(">").assertDoesNotExist()
+    }
+
+    @Test
+    fun displaysPagingControlWhenMorePagesRemain() {
+        setScreen(
+            BasketUiState(cartItems = listOf(testCartItem("p1")), pageNumber = 1, canGoNext = true)
+        )
+
+        composeTestRule.onNodeWithText("1").assertIsDisplayed()
+        composeTestRule.onNodeWithText(">").assertIsDisplayed()
+    }
+
+    @Test
+    fun clickingNextPageInvokesCallback() {
+        var nextCalled = false
+        setScreen(
+            uiState = BasketUiState(cartItems = listOf(testCartItem("p1")), canGoNext = true),
+            onNextPage = { nextCalled = true }
+        )
+
+        composeTestRule.onNodeWithText(">").performClick()
+
+        assert(nextCalled)
+    }
+
+    @Test
+    fun clickingPreviousPageInvokesCallback() {
+        var previousCalled = false
+        setScreen(
+            uiState = BasketUiState(cartItems = listOf(testCartItem("p1")), pageNumber = 2, canGoPrevious = true),
+            onPreviousPage = { previousCalled = true }
+        )
+
+        composeTestRule.onNodeWithText("<").performClick()
+
+        assert(previousCalled)
+    }
+
+    private fun setScreen(
+        uiState: BasketUiState,
+        onRemove: (String) -> Unit = {},
+        onPreviousPage: () -> Unit = {},
+        onNextPage: () -> Unit = {}
+    ) {
+        composeTestRule.setContent {
+            BasketScreen(
+                uiState = uiState,
+                onBack = {},
+                onRemove = onRemove,
+                onPreviousPage = onPreviousPage,
+                onNextPage = onNextPage
+            )
+        }
     }
 
     private fun testCartItem(id: String): CartItem {
