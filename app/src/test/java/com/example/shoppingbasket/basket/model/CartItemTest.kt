@@ -46,4 +46,27 @@ class CartItemTest {
 
         assertThat(cartItem.accumulate(Money(1_000))).isEqualTo(Money(21_000))
     }
+
+    @Test
+    @DisplayName("수량을 하나 줄인 새 항목을 반환한다")
+    fun decreased() {
+        val cartItem = CartItem(testProduct("p1", 10_000), Quantity(2))
+
+        assertThat(cartItem.decreased().displayQuantity()).isEqualTo("1")
+    }
+
+    @Test
+    @DisplayName("최소 수량 여부를 판단한다")
+    fun isMinimumQuantity() {
+        assertThat(CartItem(testProduct("p1", 10_000), Quantity(1)).isMinimumQuantity()).isTrue()
+        assertThat(CartItem(testProduct("p1", 10_000), Quantity(2)).isMinimumQuantity()).isFalse()
+    }
+
+    @Test
+    @DisplayName("현재 수량을 반환한다")
+    fun currentQuantity() {
+        val cartItem = CartItem(testProduct("p1", 10_000), Quantity(2))
+
+        assertThat(cartItem.currentQuantity()).isEqualTo(Quantity(2))
+    }
 }

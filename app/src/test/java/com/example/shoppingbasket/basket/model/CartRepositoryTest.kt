@@ -1,6 +1,7 @@
 package com.example.shoppingbasket.basket.model
 
 import com.example.shoppingbasket.common.fixture.testProduct
+import com.example.shoppingbasket.common.model.Quantity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -73,6 +74,66 @@ class CartRepositoryTest {
         repository.remove("p6")
 
         assertThat(repository.coercePage(secondPage).number()).isEqualTo(1)
+    }
+
+    @Test
+    @DisplayName("key로 상품 수량을 늘리면 조회 결과에 반영된다")
+    fun increase() {
+        repository.add(testProduct("p1", 10_000))
+
+        repository.increase("p1")
+
+        assertThat(repository.findAll().items().first().displayQuantity()).isEqualTo("2")
+    }
+
+    @Test
+    @DisplayName("key로 상품 수량을 줄이면 조회 결과에 반영된다")
+    fun decrease() {
+        repository.add(testProduct("p1", 10_000))
+        repository.increase("p1")
+
+        repository.decrease("p1")
+
+        assertThat(repository.findAll().items().first().displayQuantity()).isEqualTo("1")
+    }
+
+    @Test
+    @DisplayName("상품의 담긴 수량을 조회한다")
+    fun quantityOf() {
+        val product = testProduct("p1", 10_000)
+        repository.add(product)
+
+        assertThat(repository.quantityOf(product)).isEqualTo(Quantity(1))
+    }
+
+    @Test
+    @DisplayName("담기지 않은 상품은 수량 조회 시 null을 반환한다")
+    fun quantityOfAbsentProduct() {
+        assertThat(repository.quantityOf(testProduct("p1", 10_000))).isNull()
+    }
+
+    @Test
+    @DisplayName("변경 리스너를 등록하면 상품 추가 시 알림을 받는다")
+    fun notifiesChangeListenerOnAdd() {
+        var notifiedCount = 0
+        repository.addChangeListener { notifiedCount += 1 }
+
+        repository.add(testProduct("p1", 10_000))
+
+        assertThat(notifiedCount).isEqualTo(1)
+    }
+
+    @Test
+    @DisplayName("등록 해제한 리스너는 더 이상 알림을 받지 않는다")
+    fun removeChangeListener() {
+        var notifiedCount = 0
+        val listener = { notifiedCount += 1 }
+        repository.addChangeListener(listener)
+        repository.removeChangeListener(listener)
+
+        repository.add(testProduct("p1", 10_000))
+
+        assertThat(notifiedCount).isEqualTo(0)
     }
 
     private fun addProducts(count: Int) {

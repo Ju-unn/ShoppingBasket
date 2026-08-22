@@ -23,7 +23,7 @@ class CartItems(private val items: List<CartItem>) {
     fun added(product: Product, quantity: Quantity = Quantity.ONE): CartItems {
         val matched = items.find { item -> item.isSameProduct(product) }
         if (matched != null) {
-            return increasedItem(matched, quantity)
+            return replaceMatching(matched.key()) { item -> item.increasedBy(quantity) }
         }
         return CartItems(items + CartItem(product, quantity))
     }
@@ -32,15 +32,39 @@ class CartItems(private val items: List<CartItem>) {
         return CartItems(items.filterNot { item -> item.key() == key })
     }
 
-    private fun increasedItem(matched: CartItem, quantity: Quantity): CartItems {
-        val updated = items.map { item -> replaceIfMatched(item, matched, quantity) }
+    fun increase(key: String): CartItems = replaceMatching(key) { item -> item.increasedBy(Quantity.ONE) }
+
+    // 수량 1에서 감소를 누르면 장바구니에서 제거한다 (3단계 확정 사항)
+    fun decrease(key: String): CartItems {
+        val matched = items.find { item -> item.key() == key } ?: return this
+        if (matched.isMinimumQuantity()) {
+            return removed(key)
+        }
+        return replaceMatching(key) { item -> item.decreased() }
+    }
+
+    fun quantityOf(product: Product): Quantity? {
+        return items.find { item -> item.isSameProduct(product) }?.currentQuantity()
+    }
+
+    fun totalQuantityDisplayValue(): String {
+        if (isEmpty()) {
+            return "0"
+        }
+        return items.map { item -> item.currentQuantity() }
+            .reduce { total, quantity -> total.increasedBy(quantity) }
+            .toDisplayValue()
+    }
+
+    private fun replaceMatching(key: String, transform: (CartItem) -> CartItem): CartItems {
+        val updated = items.map { item -> replaceIfMatched(item, key, transform) }
         return CartItems(updated)
     }
 
-    private fun replaceIfMatched(item: CartItem, matched: CartItem, quantity: Quantity): CartItem {
-        if (item.key() != matched.key()) {
+    private fun replaceIfMatched(item: CartItem, key: String, transform: (CartItem) -> CartItem): CartItem {
+        if (item.key() != key) {
             return item
         }
-        return item.increasedBy(quantity)
+        return transform(item)
     }
 }
