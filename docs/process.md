@@ -1,7 +1,7 @@
 # 진행 상황
 
 이 문서는 "1단계~8단계" 미션 진행 상황을 기록한다. Pencil 디자인 원본은
-`C:\Users\home\OneDrive\Desktop\쇼핑\shoppingUi.pen` 이고, 각 화면 프레임에
+`C:\Users\apf_temp_admin\Desktop\쇼핑\shoppingUi.pen` 이고, 각 화면 프레임에
 `1단계` ~ `8단계` 라벨이 붙어 있다.
 
 ## 전체 단계 개요 (pen 디자인 기준)
@@ -35,6 +35,29 @@
 - pen의 TopBar 컴포넌트 구조에 맞춰 `ShoppingTopBar`를 확장(leadingIcon 슬롯 추가)하고, `ProductDetailScreen`/`BasketScreen`이 각자 재구현하던 topbar 코드를 제거해서 공용 컴포저블로 통일
 - 테스트 중복 정리: `common/fixture/`(ProductFixture, CartRepositoryFixture)로 `testProduct()`/`clearCartRepository()` 공용화, 5개 테스트 파일의 중복 제거
 - 전 화면 클릭 요소(`clickable`)에서 리플 애니메이션 제거 (`Modifier.noRippleClickable` 공용 확장 함수 추가)
+
+## 결정 사항 (이 프로젝트 한정)
+
+`CLAUDE.md` 는 여러 프로젝트가 공유하는 공통 규칙 문서다. **이 프로젝트에만 해당하는 예외·결정은
+CLAUDE.md 를 고치지 말고 여기에 기록한다.**
+
+### 1. 코루틴은 나중에 도입한다 (2026-08-22)
+
+- `StateFlow` 는 코루틴 타입(`kotlinx.coroutines.flow.StateFlow`)이라 코루틴 없이는 쓸 수 없다.
+  따라서 CLAUDE.md 3.4 의 "`StateFlow` 노출 + `collectAsStateWithLifecycle()` 구독" 은 **당분간 적용하지 않는다.**
+- 그동안 ViewModel 은 지금처럼 `androidx.compose.runtime.State` / `mutableStateOf` 로 상태를 노출한다.
+  (CLAUDE.md 3.1 의 Compose 타입 금지에 대한 한시적 예외. **상태 보관 타입에만** 해당하고
+  `Context` / `@Composable` / `View` / `Modifier` 는 여전히 금지다.)
+- 코루틴을 도입하는 시점에 3개 ViewModel(`ProductListViewModel`, `ProductDetailViewModel`,
+  `BasketViewModel`)을 `StateFlow` 방식으로 일괄 전환한다. 그때 `libs.versions.toml` 에
+  `kotlinx-coroutines-test`, `lifecycle-runtime-compose` 추가가 필요하다.
+
+### 2. 브랜치 전략은 CLAUDE.md 9장을 그대로 따르지 않는다 (2026-08-22)
+
+- 실제 저장소에는 `develop` 이 없고 기본 브랜치는 `main` 이 아니라 **`master`** 다.
+- 이 프로젝트에서는 `master` 를 통합 브랜치로 쓰고, 작업은 `master` 에서 `feature/*` 를 분기해
+  `master` 로 병합한다. `release/*` / `hotfix/*` 는 쓰지 않는다.
+- 브랜치 이름 규칙과 커밋 메시지 규칙(CLAUDE.md 9.1 / 9.2)은 그대로 따른다.
 
 ## 다음 단계
 

@@ -11,6 +11,8 @@ class ProductListViewModelTest {
     fun loadsProductsOnCreate() {
         val viewModel = ProductListViewModel()
 
-        assertThat(viewModel.uiState.value.products).hasSize(6)
+        // 아직 페이지 단위 로딩 전이라 저장소의 상품 전체가 그대로 올라온다.
+        // 다음 작업(ProductListViewModel.loadMore)에서 첫 페이지 20개로 바뀐다.
+        assertThat(viewModel.uiState.value.products).hasSize(50)
     }
 }
