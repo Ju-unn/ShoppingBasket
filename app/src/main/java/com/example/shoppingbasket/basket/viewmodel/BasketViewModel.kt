@@ -6,16 +6,16 @@ import androidx.lifecycle.ViewModel
 import com.example.shoppingbasket.basket.model.CartRepository
 import com.example.shoppingbasket.common.model.Page
 
-class BasketViewModel : ViewModel() {
+class BasketViewModel(private val cartRepository: CartRepository) : ViewModel() {
 
     // 지금 보고 있는 페이지. 더보기와 달리 페이지를 누적하지 않고 통째로 갈아끼운다.
-    private var currentPage: Page = CartRepository.firstPage()
+    private var currentPage: Page = cartRepository.firstPage()
 
     private val _uiState = mutableStateOf(pageState())
     val uiState: State<BasketUiState> = _uiState
 
     fun nextPage() {
-        if (!CartRepository.hasPageAfter(currentPage)) {
+        if (!cartRepository.hasPageAfter(currentPage)) {
             return
         }
         currentPage = currentPage.next()
@@ -31,18 +31,18 @@ class BasketViewModel : ViewModel() {
     }
 
     fun remove(key: String) {
-        CartRepository.remove(key)
+        cartRepository.remove(key)
         // 지운 결과 현재 페이지가 비었으면 상품이 남아 있는 마지막 페이지로 당긴다
-        currentPage = CartRepository.coercePage(currentPage)
+        currentPage = cartRepository.coercePage(currentPage)
         _uiState.value = pageState()
     }
 
     private fun pageState(): BasketUiState {
         return BasketUiState(
-            cartItems = CartRepository.findPage(currentPage).items(),
+            cartItems = cartRepository.findPage(currentPage).items(),
             pageNumber = currentPage.number(),
             canGoPrevious = currentPage.hasPrevious(),
-            canGoNext = CartRepository.hasPageAfter(currentPage)
+            canGoNext = cartRepository.hasPageAfter(currentPage)
         )
     }
 }

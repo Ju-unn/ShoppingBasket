@@ -8,6 +8,7 @@ import com.example.shoppingbasket.productlist.model.ProductRepository
 
 class ProductDetailViewModel(
     productKey: String,
+    private val cartRepository: CartRepository,
     productRepository: ProductRepository = ProductRepository()
 ) : ViewModel() {
 
@@ -16,6 +17,6 @@ class ProductDetailViewModel(
 
     fun addToCart() {
         val product = _uiState.value.product ?: return
-        CartRepository.add(product)
+        cartRepository.add(product)
     }
 }

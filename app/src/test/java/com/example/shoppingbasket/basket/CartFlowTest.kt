@@ -1,11 +1,10 @@
 package com.example.shoppingbasket.basket
 
 import com.example.shoppingbasket.basket.viewmodel.BasketViewModel
-import com.example.shoppingbasket.common.fixture.clearCartRepository
+import com.example.shoppingbasket.basket.model.CartRepository
 import com.example.shoppingbasket.productdetail.viewmodel.ProductDetailViewModel
 import com.example.shoppingbasket.productlist.viewmodel.ProductListViewModel
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
@@ -15,10 +14,8 @@ import org.junit.jupiter.api.Test
  */
 class CartFlowTest {
 
-    @BeforeEach
-    fun clearCart() {
-        clearCartRepository()
-    }
+    // 실제 앱에서 Application 이 들고 있는 것과 같은, 화면들이 공유하는 장바구니 저장소
+    private val cartRepository = CartRepository()
 
     @Test
     @DisplayName("목록에서 고른 상품을 상세에서 담으면 장바구니 화면에 보인다")
@@ -26,9 +23,9 @@ class CartFlowTest {
         val listViewModel = ProductListViewModel()
         val productKey = listViewModel.uiState.value.products.first().key()
 
-        ProductDetailViewModel(productKey).addToCart()
+        ProductDetailViewModel(productKey, cartRepository).addToCart()
 
-        val basketViewModel = BasketViewModel()
+        val basketViewModel = BasketViewModel(cartRepository)
         assertThat(basketViewModel.uiState.value.cartItems).hasSize(1)
         assertThat(basketViewModel.uiState.value.cartItems.first().key()).isEqualTo(productKey)
     }
@@ -40,9 +37,9 @@ class CartFlowTest {
         listViewModel.loadMore()
         val productKey = listViewModel.uiState.value.products.last().key()
 
-        ProductDetailViewModel(productKey).addToCart()
+        ProductDetailViewModel(productKey, cartRepository).addToCart()
 
-        assertThat(BasketViewModel().uiState.value.cartItems.first().key()).isEqualTo(productKey)
+        assertThat(BasketViewModel(cartRepository).uiState.value.cartItems.first().key()).isEqualTo(productKey)
     }
 
     @Test
@@ -51,9 +48,9 @@ class CartFlowTest {
         val listViewModel = ProductListViewModel()
         val productKeys = listViewModel.uiState.value.products.take(3).map { product -> product.key() }
 
-        productKeys.forEach { productKey -> ProductDetailViewModel(productKey).addToCart() }
+        productKeys.forEach { productKey -> ProductDetailViewModel(productKey, cartRepository).addToCart() }
 
-        val cartKeys = BasketViewModel().uiState.value.cartItems.map { cartItem -> cartItem.key() }
+        val cartKeys = BasketViewModel(cartRepository).uiState.value.cartItems.map { cartItem -> cartItem.key() }
         assertThat(cartKeys).containsExactlyElementsOf(productKeys)
     }
 }

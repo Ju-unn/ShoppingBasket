@@ -4,7 +4,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.example.shoppingbasket.basket.model.CartRepository
+import androidx.test.core.app.ApplicationProvider
 import com.example.shoppingbasket.productlist.model.ProductRepository
 import org.junit.Before
 import org.junit.Rule
@@ -20,8 +20,11 @@ class MainActivityTest {
 
     @Before
     fun clearCart() {
-        // CartRepository 는 싱글턴이라 같은 프로세스의 앞선 테스트 결과가 남는다
-        CartRepository.findAll().items().forEach { item -> CartRepository.remove(item.key()) }
+        // 장바구니 저장소는 Application 수명이라 같은 프로세스의 앞선 테스트 결과가 남는다
+        val cartRepository = ApplicationProvider
+            .getApplicationContext<ShoppingBasketApplication>()
+            .cartRepository
+        cartRepository.findAll().items().forEach { item -> cartRepository.remove(item.key()) }
     }
 
     @Test
