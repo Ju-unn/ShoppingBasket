@@ -7,7 +7,10 @@ import com.example.shoppingbasket.productlist.model.ProductImageUrl
 import com.example.shoppingbasket.productlist.model.ProductName
 
 /**
- * test / androidTest에서 공통으로 사용하는 테스트용 상품 픽스처
+ * JVM 단위 테스트(src/test)에서 사용하는 테스트용 상품 픽스처.
+ *
+ * androidTest 는 별도 소스셋이라 이 파일을 참조할 수 없다.
+ * 계측 테스트는 각자 Product(...) 를 직접 만들어 쓴다.
  */
 // 테스트용 상품 생성
 fun testProduct(id: String = "p1", priceWon: Int = 10_000): Product = Product(

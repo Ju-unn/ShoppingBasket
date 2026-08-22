@@ -11,4 +11,5 @@
     <string name="load_more_button">더보기</string>
     <string name="paging_previous_button">&lt;</string>
     <string name="paging_next_button">&gt;</string>
+    <string name="empty_cart_message">장바구니에 담긴 상품이 없습니다</string>
 </resources>

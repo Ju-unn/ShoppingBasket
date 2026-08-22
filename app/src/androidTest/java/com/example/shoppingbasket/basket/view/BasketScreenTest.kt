@@ -43,6 +43,20 @@ class BasketScreenTest {
     }
 
     @Test
+    fun displaysEmptyMessageWhenCartIsEmpty() {
+        setScreen(BasketUiState(cartItems = emptyList()))
+
+        composeTestRule.onNodeWithText("장바구니에 담긴 상품이 없습니다").assertIsDisplayed()
+    }
+
+    @Test
+    fun hidesEmptyMessageWhenCartHasItems() {
+        setScreen(BasketUiState(cartItems = listOf(testCartItem("p1"))))
+
+        composeTestRule.onNodeWithText("장바구니에 담긴 상품이 없습니다").assertDoesNotExist()
+    }
+
+    @Test
     fun hidesPagingControlWhenSinglePage() {
         setScreen(BasketUiState(cartItems = listOf(testCartItem("p1"))))
 
