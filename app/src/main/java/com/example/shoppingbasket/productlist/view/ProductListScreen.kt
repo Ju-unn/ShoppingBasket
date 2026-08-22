@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Icon
@@ -18,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.shoppingbasket.R
 import com.example.shoppingbasket.common.ext.noRippleClickable
+import com.example.shoppingbasket.common.view.ShoppingButton
 import com.example.shoppingbasket.common.view.ShoppingTopBar
 import com.example.shoppingbasket.productlist.model.Product
 import com.example.shoppingbasket.productlist.viewmodel.ProductListUiState
@@ -27,6 +29,7 @@ fun ProductListScreen(
     uiState: ProductListUiState,
     onProductClick: (String) -> Unit,
     onCartClick: () -> Unit,
+    onLoadMore: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -47,12 +50,23 @@ fun ProductListScreen(
                 )
             }
         )
-        ProductGrid(products = uiState.products, onProductClick = onProductClick)
+        ProductGrid(
+            products = uiState.products,
+            canLoadMore = uiState.canLoadMore,
+            onProductClick = onProductClick,
+            onLoadMore = onLoadMore
+        )
     }
 }
 
 @Composable
-private fun ProductGrid(products: List<Product>, onProductClick: (String) -> Unit, modifier: Modifier = Modifier) {
+private fun ProductGrid(
+    products: List<Product>,
+    canLoadMore: Boolean,
+    onProductClick: (String) -> Unit,
+    onLoadMore: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = modifier.fillMaxSize(),
@@ -62,6 +76,12 @@ private fun ProductGrid(products: List<Product>, onProductClick: (String) -> Uni
     ) {
         items(products, key = { product -> product.key() }) { product ->
             ProductGridItem(product, modifier = Modifier.noRippleClickable { onProductClick(product.key()) })
+        }
+        // 마지막 페이지까지 읽었으면 더보기 버튼 자체를 두지 않는다
+        if (canLoadMore) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                ShoppingButton(text = stringResource(R.string.load_more_button), onClick = onLoadMore)
+            }
         }
     }
 }
