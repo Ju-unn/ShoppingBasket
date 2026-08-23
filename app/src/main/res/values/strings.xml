@@ -12,4 +12,6 @@
     <string name="paging_previous_button">&lt;</string>
     <string name="paging_next_button">&gt;</string>
     <string name="empty_cart_message">장바구니에 담긴 상품이 없습니다</string>
+    <string name="decrease_quantity_description">수량 감소</string>
+    <string name="increase_quantity_description">수량 증가</string>
 </resources>
