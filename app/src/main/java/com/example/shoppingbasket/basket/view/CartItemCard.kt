@@ -29,10 +29,20 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.example.shoppingbasket.R
 import com.example.shoppingbasket.basket.model.CartItem
 import com.example.shoppingbasket.common.ext.noRippleClickable
+import com.example.shoppingbasket.common.view.Stepper
+
+// pen 카드(k0IHi)의 Stepper 하단(y=102)과 금액 상단(y=108) 사이 간격
+private val STEPPER_PRICE_GAP = 6.dp
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun CartItemCard(cartItem: CartItem, onRemove: () -> Unit, modifier: Modifier = Modifier) {
+fun CartItemCard(
+    cartItem: CartItem,
+    onRemove: () -> Unit,
+    onIncrease: () -> Unit,
+    onDecrease: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -58,11 +68,19 @@ fun CartItemCard(cartItem: CartItem, onRemove: () -> Unit, modifier: Modifier = 
                         .clip(RoundedCornerShape(4.dp))
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = cartItem.displayTotalPrice(),
-                    fontSize = 16.sp,
-                    color = colorResource(R.color.gray_5)
-                )
+                Column(horizontalAlignment = Alignment.End) {
+                    Stepper(
+                        quantityText = cartItem.displayQuantity(),
+                        onIncrease = onIncrease,
+                        onDecrease = onDecrease
+                    )
+                    Spacer(modifier = Modifier.height(STEPPER_PRICE_GAP))
+                    Text(
+                        text = cartItem.displayTotalPrice(),
+                        fontSize = 16.sp,
+                        color = colorResource(R.color.gray_5)
+                    )
+                }
             }
         }
         Icon(

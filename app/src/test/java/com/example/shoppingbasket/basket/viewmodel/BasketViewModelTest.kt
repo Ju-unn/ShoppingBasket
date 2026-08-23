@@ -134,6 +134,42 @@ class BasketViewModelTest {
         assertThat(viewModel.uiState.value.cartItems).hasSize(2)
     }
 
+    @Test
+    @DisplayName("수량을 늘리면 상태와 저장소에 반영된다")
+    fun increase() {
+        cartRepository.add(testProduct("p1"))
+        val viewModel = BasketViewModel(cartRepository)
+
+        viewModel.increase("p1")
+
+        assertThat(viewModel.uiState.value.cartItems.first().displayQuantity()).isEqualTo("2")
+    }
+
+    @Test
+    @DisplayName("수량이 2 이상일 때 줄이면 상품은 그대로 남는다")
+    fun decrease() {
+        cartRepository.add(testProduct("p1"))
+        cartRepository.increase("p1")
+        val viewModel = BasketViewModel(cartRepository)
+
+        viewModel.decrease("p1")
+
+        assertThat(viewModel.uiState.value.cartItems.first().displayQuantity()).isEqualTo("1")
+    }
+
+    @Test
+    @DisplayName("수량 1에서 줄이면 항목이 제거되고 마지막 페이지로 당겨진다")
+    fun decreaseAtMinimumRemovesItemAndCoercesPage() {
+        addProducts(6)
+        val viewModel = BasketViewModel(cartRepository)
+        viewModel.nextPage()
+
+        viewModel.decrease("p6")
+
+        assertThat(viewModel.uiState.value.pageNumber).isEqualTo(1)
+        assertThat(viewModel.uiState.value.cartItems).hasSize(5)
+    }
+
     private fun addProducts(count: Int) {
         (1..count).forEach { number -> cartRepository.add(testProduct("p$number")) }
     }

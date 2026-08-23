@@ -43,6 +43,32 @@ class BasketScreenTest {
     }
 
     @Test
+    fun clickingIncreaseInvokesCallbackWithKey() {
+        var increasedKey: String? = null
+        setScreen(
+            uiState = BasketUiState(cartItems = listOf(testCartItem("p1"))),
+            onIncrease = { key -> increasedKey = key }
+        )
+
+        composeTestRule.onNodeWithContentDescription("수량 증가").performClick()
+
+        assert(increasedKey == "p1")
+    }
+
+    @Test
+    fun clickingDecreaseInvokesCallbackWithKey() {
+        var decreasedKey: String? = null
+        setScreen(
+            uiState = BasketUiState(cartItems = listOf(testCartItem("p1"))),
+            onDecrease = { key -> decreasedKey = key }
+        )
+
+        composeTestRule.onNodeWithContentDescription("수량 감소").performClick()
+
+        assert(decreasedKey == "p1")
+    }
+
+    @Test
     fun displaysEmptyMessageWhenCartIsEmpty() {
         setScreen(BasketUiState(cartItems = emptyList()))
 
@@ -103,6 +129,8 @@ class BasketScreenTest {
     private fun setScreen(
         uiState: BasketUiState,
         onRemove: (String) -> Unit = {},
+        onIncrease: (String) -> Unit = {},
+        onDecrease: (String) -> Unit = {},
         onPreviousPage: () -> Unit = {},
         onNextPage: () -> Unit = {}
     ) {
@@ -111,6 +139,8 @@ class BasketScreenTest {
                 uiState = uiState,
                 onBack = {},
                 onRemove = onRemove,
+                onIncrease = onIncrease,
+                onDecrease = onDecrease,
                 onPreviousPage = onPreviousPage,
                 onNextPage = onNextPage
             )

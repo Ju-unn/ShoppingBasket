@@ -39,6 +39,8 @@ fun BasketScreen(
     uiState: BasketUiState,
     onBack: () -> Unit,
     onRemove: (String) -> Unit,
+    onIncrease: (String) -> Unit,
+    onDecrease: (String) -> Unit,
     onPreviousPage: () -> Unit,
     onNextPage: () -> Unit,
     modifier: Modifier = Modifier
@@ -62,7 +64,13 @@ fun BasketScreen(
                 }
             }
         )
-        CartContent(cartItems = uiState.cartItems, onRemove = onRemove, modifier = Modifier.weight(1f))
+        CartContent(
+            cartItems = uiState.cartItems,
+            onRemove = onRemove,
+            onIncrease = onIncrease,
+            onDecrease = onDecrease,
+            modifier = Modifier.weight(1f)
+        )
         PagingArea(uiState = uiState, onPreviousPage = onPreviousPage, onNextPage = onNextPage)
     }
 }
@@ -87,12 +95,24 @@ private fun ColumnScope.PagingArea(uiState: BasketUiState, onPreviousPage: () ->
 
 // 담긴 상품이 없으면 목록 대신 안내 문구를 보여준다
 @Composable
-private fun CartContent(cartItems: List<CartItem>, onRemove: (String) -> Unit, modifier: Modifier = Modifier) {
+private fun CartContent(
+    cartItems: List<CartItem>,
+    onRemove: (String) -> Unit,
+    onIncrease: (String) -> Unit,
+    onDecrease: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     if (cartItems.isEmpty()) {
         EmptyCartMessage(modifier = modifier)
         return
     }
-    CartItemList(cartItems = cartItems, onRemove = onRemove, modifier = modifier)
+    CartItemList(
+        cartItems = cartItems,
+        onRemove = onRemove,
+        onIncrease = onIncrease,
+        onDecrease = onDecrease,
+        modifier = modifier
+    )
 }
 
 @Composable
@@ -108,14 +128,25 @@ private fun EmptyCartMessage(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun CartItemList(cartItems: List<CartItem>, onRemove: (String) -> Unit, modifier: Modifier = Modifier) {
+private fun CartItemList(
+    cartItems: List<CartItem>,
+    onRemove: (String) -> Unit,
+    onIncrease: (String) -> Unit,
+    onDecrease: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 24.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         items(cartItems, key = { cartItem -> cartItem.key() }) { cartItem ->
-            CartItemCard(cartItem = cartItem, onRemove = { onRemove(cartItem.key()) })
+            CartItemCard(
+                cartItem = cartItem,
+                onRemove = { onRemove(cartItem.key()) },
+                onIncrease = { onIncrease(cartItem.key()) },
+                onDecrease = { onDecrease(cartItem.key()) }
+            )
         }
     }
 }
