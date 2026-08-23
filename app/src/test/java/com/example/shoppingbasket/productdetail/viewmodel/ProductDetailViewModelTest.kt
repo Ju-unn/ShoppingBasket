@@ -35,4 +35,46 @@ class ProductDetailViewModelTest {
 
         assertThat(cartRepository.findAll().items()).hasSize(1)
     }
+
+    @Test
+    @DisplayName("수량 증가를 누르면 로컬 수량 표시가 늘어난다")
+    fun increaseChangesLocalQuantity() {
+        val viewModel = ProductDetailViewModel("p1", cartRepository)
+
+        viewModel.increase()
+
+        assertThat(viewModel.uiState.value.quantityDisplayValue()).isEqualTo("2")
+    }
+
+    @Test
+    @DisplayName("최소 수량에서 수량 감소를 눌러도 1 밑으로 내려가지 않는다")
+    fun decreaseStaysAtMinimum() {
+        val viewModel = ProductDetailViewModel("p1", cartRepository)
+
+        viewModel.decrease()
+
+        assertThat(viewModel.uiState.value.quantityDisplayValue()).isEqualTo("1")
+    }
+
+    @Test
+    @DisplayName("수량을 늘린 뒤 담으면 늘어난 수량만큼 저장소에 반영된다")
+    fun addToCartUsesIncreasedQuantity() {
+        val viewModel = ProductDetailViewModel("p1", cartRepository)
+        viewModel.increase()
+        viewModel.increase()
+
+        viewModel.addToCart()
+
+        assertThat(cartRepository.findAll().items().first().displayQuantity()).isEqualTo("3")
+    }
+
+    @Test
+    @DisplayName("장바구니에 없는 상품이면 수량을 늘려도 로컬 상태만 바뀐다")
+    fun increaseDoesNotAffectCartUntilAdded() {
+        val viewModel = ProductDetailViewModel("p1", cartRepository)
+
+        viewModel.increase()
+
+        assertThat(cartRepository.findAll().items()).isEmpty()
+    }
 }

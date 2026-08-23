@@ -90,7 +90,9 @@ private fun ProductDetailRoute(productId: String, navController: NavHostControll
     ProductDetailScreen(
         uiState = uiState,
         onClose = { navController.popBackStack() },
-        onAddToCart = { viewModel.addToCart() }
+        onAddToCart = { viewModel.addToCart() },
+        onIncrease = { viewModel.increase() },
+        onDecrease = { viewModel.decrease() }
     )
 }
 
