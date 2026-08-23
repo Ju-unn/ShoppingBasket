@@ -20,7 +20,7 @@ class CartFlowTest {
     @Test
     @DisplayName("목록에서 고른 상품을 상세에서 담으면 장바구니 화면에 보인다")
     fun addFromDetailAppearsInBasket() {
-        val listViewModel = ProductListViewModel()
+        val listViewModel = ProductListViewModel(cartRepository)
         val productKey = listViewModel.uiState.value.products.first().key()
 
         ProductDetailViewModel(productKey, cartRepository).addToCart()
@@ -33,7 +33,7 @@ class CartFlowTest {
     @Test
     @DisplayName("더보기로 불러온 뒤쪽 페이지 상품도 담을 수 있다")
     fun addProductFromLoadedPage() {
-        val listViewModel = ProductListViewModel()
+        val listViewModel = ProductListViewModel(cartRepository)
         listViewModel.loadMore()
         val productKey = listViewModel.uiState.value.products.last().key()
 
@@ -45,8 +45,8 @@ class CartFlowTest {
     @Test
     @DisplayName("여러 상품을 담으면 장바구니 첫 페이지에 순서대로 쌓인다")
     fun addMultipleProducts() {
-        val listViewModel = ProductListViewModel()
-        val productKeys = listViewModel.uiState.value.products.take(3).map { product -> product.key() }
+        val listViewModel = ProductListViewModel(cartRepository)
+        val productKeys = listViewModel.uiState.value.products.take(3).map { item -> item.key() }
 
         productKeys.forEach { productKey -> ProductDetailViewModel(productKey, cartRepository).addToCart() }
 
