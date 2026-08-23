@@ -15,8 +15,17 @@ class ProductDetailViewModel(
     private val _uiState = mutableStateOf(ProductDetailUiState(product = productRepository.findById(productKey)))
     val uiState: State<ProductDetailUiState> = _uiState
 
+    fun increase() {
+        _uiState.value = _uiState.value.increasedQuantity()
+    }
+
+    fun decrease() {
+        _uiState.value = _uiState.value.decreasedQuantity()
+    }
+
     fun addToCart() {
-        val product = _uiState.value.product ?: return
-        cartRepository.add(product)
+        val state = _uiState.value
+        val product = state.product ?: return
+        cartRepository.add(product, state.quantity)
     }
 }

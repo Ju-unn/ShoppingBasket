@@ -22,7 +22,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -31,6 +30,7 @@ import com.example.shoppingbasket.R
 import com.example.shoppingbasket.common.ext.noRippleClickable
 import com.example.shoppingbasket.common.view.ShoppingButton
 import com.example.shoppingbasket.common.view.ShoppingTopBar
+import com.example.shoppingbasket.common.view.Stepper
 import com.example.shoppingbasket.productdetail.viewmodel.ProductDetailUiState
 import com.example.shoppingbasket.productlist.model.Product
 
@@ -39,6 +39,8 @@ fun ProductDetailScreen(
     uiState: ProductDetailUiState,
     onClose: () -> Unit,
     onAddToCart: () -> Unit,
+    onIncrease: () -> Unit,
+    onDecrease: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val product = uiState.product ?: return
@@ -57,7 +59,7 @@ fun ProductDetailScreen(
         )
         Column(modifier = Modifier.weight(1f)) {
             ProductDetailImage(imageUrl = product.displayImageUrl())
-            ProductDetailInfo(product = product)
+            ProductDetailInfo(product = product, uiState = uiState, onIncrease = onIncrease, onDecrease = onDecrease)
         }
         AddToCartButton(onClick = onAddToCart)
     }
@@ -77,7 +79,13 @@ private fun ProductDetailImage(imageUrl: String, modifier: Modifier = Modifier) 
 }
 
 @Composable
-private fun ProductDetailInfo(product: Product, modifier: Modifier = Modifier) {
+private fun ProductDetailInfo(
+    product: Product,
+    uiState: ProductDetailUiState,
+    onIncrease: () -> Unit,
+    onDecrease: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(modifier = modifier.padding(horizontal = 18.dp)) {
         Spacer(modifier = Modifier.height(16.dp))
         Text(
@@ -89,24 +97,28 @@ private fun ProductDetailInfo(product: Product, modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(17.dp))
         HorizontalDivider(color = colorResource(R.color.gray_border), thickness = 1.dp)
         Spacer(modifier = Modifier.height(16.dp))
-        PriceRow(displayPrice = product.displayPrice())
+        PriceAndQuantityRow(uiState = uiState, onIncrease = onIncrease, onDecrease = onDecrease)
     }
 }
 
 @Composable
-private fun PriceRow(displayPrice: String, modifier: Modifier = Modifier) {
-    Row(modifier = modifier.fillMaxWidth()) {
+private fun PriceAndQuantityRow(
+    uiState: ProductDetailUiState,
+    onIncrease: () -> Unit,
+    onDecrease: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = stringResource(R.string.price_label),
+            text = uiState.totalPriceDisplayValue(),
             fontSize = 20.sp,
             color = colorResource(R.color.black),
             modifier = Modifier.weight(1f)
         )
-        Text(
-            text = displayPrice,
-            fontSize = 20.sp,
-            color = colorResource(R.color.black),
-            textAlign = TextAlign.End
+        Stepper(
+            quantityText = uiState.quantityDisplayValue(),
+            onIncrease = onIncrease,
+            onDecrease = onDecrease
         )
     }
 }

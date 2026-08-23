@@ -20,6 +20,14 @@ class CartRepositoryTest {
     }
 
     @Test
+    @DisplayName("수량을 지정해서 담으면 지정한 수량으로 담긴다")
+    fun addWithQuantity() {
+        repository.add(testProduct("p1", 10_000), Quantity(3))
+
+        assertThat(repository.findAll().items().first().displayQuantity()).isEqualTo("3")
+    }
+
+    @Test
     @DisplayName("key로 상품을 제거하면 조회 결과에서 사라진다")
     fun remove() {
         repository.add(testProduct("p1", 10_000))

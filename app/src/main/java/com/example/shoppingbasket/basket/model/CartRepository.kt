@@ -12,8 +12,8 @@ class CartRepository {
     private var cartItems = CartItems(emptyList())
     private val changeListeners = mutableListOf<() -> Unit>()
 
-    fun add(product: Product) {
-        cartItems = cartItems.added(product)
+    fun add(product: Product, quantity: Quantity = Quantity.ONE) {
+        cartItems = cartItems.added(product, quantity)
         notifyChanged()
     }
 
