@@ -92,8 +92,9 @@ class BasketScreenTest {
 
     @Test
     fun displaysPagingControlWhenMorePagesRemain() {
+        // 카드의 수량(Stepper)도 "1"을 표시할 수 있어 페이지 번호와 겹치지 않게 수량을 2로 둔다
         setScreen(
-            BasketUiState(cartItems = listOf(testCartItem("p1")), pageNumber = 1, canGoNext = true)
+            BasketUiState(cartItems = listOf(testCartItem("p1", Quantity(2))), pageNumber = 1, canGoNext = true)
         )
 
         composeTestRule.onNodeWithText("1").assertIsDisplayed()
@@ -147,13 +148,13 @@ class BasketScreenTest {
         }
     }
 
-    private fun testCartItem(id: String): CartItem {
+    private fun testCartItem(id: String, quantity: Quantity = Quantity(1)): CartItem {
         val product = Product(
             ProductId(id),
             ProductName("PET보틀-정사각(500ml)"),
             Money(10_000),
             ProductImageUrl("https://picsum.photos/seed/$id/600")
         )
-        return CartItem(product, Quantity(1))
+        return CartItem(product, quantity)
     }
 }
