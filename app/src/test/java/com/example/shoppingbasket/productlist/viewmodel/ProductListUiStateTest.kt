@@ -17,4 +17,10 @@ class ProductListUiStateTest {
     fun defaultCannotLoadMore() {
         assertThat(ProductListUiState().canLoadMore).isFalse()
     }
+
+    @Test
+    @DisplayName("기본 상태의 장바구니 배지는 0이다")
+    fun defaultCartBadgeText() {
+        assertThat(ProductListUiState().cartBadgeText).isEqualTo("0")
+    }
 }

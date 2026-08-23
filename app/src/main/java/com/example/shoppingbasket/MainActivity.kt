@@ -63,13 +63,19 @@ private fun ShoppingNavHost(navController: NavHostController = rememberNavContro
 }
 
 @Composable
-private fun ProductListRoute(navController: NavHostController, viewModel: ProductListViewModel = viewModel()) {
+private fun ProductListRoute(navController: NavHostController) {
+    val viewModel: ProductListViewModel = viewModel(
+        factory = viewModelFactory { initializer { ProductListViewModel(cartRepository()) } }
+    )
     val uiState by viewModel.uiState
     ProductListScreen(
         uiState = uiState,
         onProductClick = { productId -> navController.navigate("productDetail/$productId") },
         onCartClick = { navController.navigate(ROUTE_BASKET) },
-        onLoadMore = { viewModel.loadMore() }
+        onLoadMore = { viewModel.loadMore() },
+        onAddToCart = { key -> viewModel.addToCart(key) },
+        onIncrease = { key -> viewModel.increase(key) },
+        onDecrease = { key -> viewModel.decrease(key) }
     )
 }
 
