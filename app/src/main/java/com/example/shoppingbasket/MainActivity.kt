@@ -22,7 +22,7 @@ import com.example.shoppingbasket.basket.view.BasketScreen
 import com.example.shoppingbasket.basket.viewmodel.BasketViewModel
 import com.example.shoppingbasket.productdetail.view.ProductDetailScreen
 import com.example.shoppingbasket.productdetail.viewmodel.ProductDetailViewModel
-import com.example.shoppingbasket.productlist.model.ProductRepository
+import com.example.shoppingbasket.productlist.domain.repository.ProductRepository
 import com.example.shoppingbasket.productlist.view.ProductListScreen
 import com.example.shoppingbasket.productlist.viewmodel.ProductListViewModel
 import com.example.shoppingbasket.recentlyviewed.model.RecentlyViewedRepository

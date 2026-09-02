@@ -1,10 +1,10 @@
 package com.example.shoppingbasket.common.fixture
 
 import com.example.shoppingbasket.common.model.Money
-import com.example.shoppingbasket.productlist.model.Product
-import com.example.shoppingbasket.productlist.model.ProductId
-import com.example.shoppingbasket.productlist.model.ProductImageUrl
-import com.example.shoppingbasket.productlist.model.ProductName
+import com.example.shoppingbasket.productlist.domain.model.Product
+import com.example.shoppingbasket.productlist.domain.model.ProductId
+import com.example.shoppingbasket.productlist.domain.model.ProductImageUrl
+import com.example.shoppingbasket.productlist.domain.model.ProductName
 
 /**
  * JVM 단위 테스트(src/test)에서 사용하는 테스트용 상품 픽스처.

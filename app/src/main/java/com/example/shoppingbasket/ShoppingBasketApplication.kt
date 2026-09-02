@@ -2,7 +2,8 @@ package com.example.shoppingbasket
 
 import android.app.Application
 import com.example.shoppingbasket.basket.model.CartRepository
-import com.example.shoppingbasket.productlist.model.ProductRepository
+import com.example.shoppingbasket.productlist.data.repository.ProductRepositoryImpl
+import com.example.shoppingbasket.productlist.domain.repository.ProductRepository
 import com.example.shoppingbasket.recentlyviewed.model.RecentlyViewedRepository
 
 // 앱 전체가 공유하는 의존성을 보관한다 (수동 DI 컨테이너).
@@ -13,5 +14,5 @@ class ShoppingBasketApplication : Application() {
 
     val cartRepository: CartRepository = CartRepository()
     val recentlyViewedRepository: RecentlyViewedRepository = RecentlyViewedRepository()
-    val productRepository: ProductRepository = ProductRepository()
+    val productRepository: ProductRepository = ProductRepositoryImpl()
 }

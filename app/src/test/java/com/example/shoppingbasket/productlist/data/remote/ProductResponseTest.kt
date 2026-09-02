@@ -1,4 +1,4 @@
-package com.example.shoppingbasket.productlist.model
+package com.example.shoppingbasket.productlist.data.remote
 
 import com.example.shoppingbasket.common.model.Money
 import org.assertj.core.api.Assertions.assertThat

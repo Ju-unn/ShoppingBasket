@@ -1,8 +1,9 @@
 package com.example.shoppingbasket.common.fixture
 
-import com.example.shoppingbasket.productlist.model.ProductApi
-import com.example.shoppingbasket.productlist.model.ProductRepository
-import com.example.shoppingbasket.productlist.model.ProductResponse
+import com.example.shoppingbasket.productlist.data.remote.ProductApi
+import com.example.shoppingbasket.productlist.data.remote.ProductResponse
+import com.example.shoppingbasket.productlist.data.repository.ProductRepositoryImpl
+import com.example.shoppingbasket.productlist.domain.repository.ProductRepository
 import okhttp3.Request
 import okio.Timeout
 import retrofit2.Call
@@ -40,7 +41,7 @@ fun fakeProductResponses(count: Int = 50): List<ProductResponse> {
 }
 
 fun fakeProductRepository(count: Int = 50): ProductRepository {
-    val repository = ProductRepository(FakeProductApi(fakeProductResponses(count)))
+    val repository = ProductRepositoryImpl(FakeProductApi(fakeProductResponses(count)))
     repository.fetchProducts {}
     return repository
 }

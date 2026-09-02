@@ -1,4 +1,4 @@
-package com.example.shoppingbasket.productlist.model
+package com.example.shoppingbasket.productlist.data.remote
 
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType

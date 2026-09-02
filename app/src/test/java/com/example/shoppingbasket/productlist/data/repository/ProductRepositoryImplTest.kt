@@ -1,4 +1,4 @@
-package com.example.shoppingbasket.productlist.model
+package com.example.shoppingbasket.productlist.data.repository
 
 import com.example.shoppingbasket.common.fixture.FakeProductApi
 import com.example.shoppingbasket.common.fixture.fakeProductResponses
@@ -6,9 +6,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-class ProductRepositoryTest {
+class ProductRepositoryImplTest {
 
-    private val repository = ProductRepository(FakeProductApi(fakeProductResponses()))
+    private val repository = ProductRepositoryImpl(FakeProductApi(fakeProductResponses()))
 
     @Test
     @DisplayName("fetch 하기 전에는 상품이 없다")

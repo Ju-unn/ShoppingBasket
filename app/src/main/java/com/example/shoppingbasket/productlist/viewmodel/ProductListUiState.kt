@@ -1,6 +1,6 @@
 package com.example.shoppingbasket.productlist.viewmodel
 
-import com.example.shoppingbasket.productlist.model.Product
+import com.example.shoppingbasket.productlist.domain.model.Product
 
 data class ProductListUiState(
     val products: List<ProductListItem> = emptyList(),

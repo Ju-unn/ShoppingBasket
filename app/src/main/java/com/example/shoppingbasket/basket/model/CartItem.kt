@@ -2,7 +2,7 @@ package com.example.shoppingbasket.basket.model
 
 import com.example.shoppingbasket.common.model.Money
 import com.example.shoppingbasket.common.model.Quantity
-import com.example.shoppingbasket.productlist.model.Product
+import com.example.shoppingbasket.productlist.domain.model.Product
 
 data class CartItem(
     private val product: Product,

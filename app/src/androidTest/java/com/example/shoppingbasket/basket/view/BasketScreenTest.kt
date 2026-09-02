@@ -9,10 +9,10 @@ import com.example.shoppingbasket.basket.model.CartItem
 import com.example.shoppingbasket.basket.viewmodel.BasketUiState
 import com.example.shoppingbasket.common.model.Money
 import com.example.shoppingbasket.common.model.Quantity
-import com.example.shoppingbasket.productlist.model.Product
-import com.example.shoppingbasket.productlist.model.ProductId
-import com.example.shoppingbasket.productlist.model.ProductImageUrl
-import com.example.shoppingbasket.productlist.model.ProductName
+import com.example.shoppingbasket.productlist.domain.model.Product
+import com.example.shoppingbasket.productlist.domain.model.ProductId
+import com.example.shoppingbasket.productlist.domain.model.ProductImageUrl
+import com.example.shoppingbasket.productlist.domain.model.ProductName
 import org.junit.Rule
 import org.junit.Test
 
