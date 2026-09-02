@@ -1,6 +1,6 @@
 package com.example.shoppingbasket.recentlyviewed.model
 
-import com.example.shoppingbasket.productlist.model.Product
+import com.example.shoppingbasket.productlist.domain.model.Product
 
 // 최근 본 상품 일급 컬렉션. 최신순으로 최대 MAX_SIZE개까지만 보관한다.
 class RecentlyViewedProducts(private val products: List<Product>) {

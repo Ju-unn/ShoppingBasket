@@ -1,24 +1,24 @@
-package com.example.shoppingbasket.productlist.model
+package com.example.shoppingbasket.productlist.domain.model
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-class ProductImageUrlTest {
+class ProductNameTest {
 
     @Test
-    @DisplayName("표시값으로 원본 URL 문자열을 반환한다")
+    @DisplayName("표시값으로 원본 문자열을 반환한다")
     fun toDisplayValue() {
-        val imageUrl = ProductImageUrl("https://picsum.photos/seed/p1/600")
+        val name = ProductName("PET보틀-정사각(500ml)")
 
-        assertThat(imageUrl.toDisplayValue()).isEqualTo("https://picsum.photos/seed/p1/600")
+        assertThat(name.toDisplayValue()).isEqualTo("PET보틀-정사각(500ml)")
     }
 
     @Test
     @DisplayName("빈 값으로 생성할 수 없다")
     fun rejectsBlankValue() {
-        assertThatThrownBy { ProductImageUrl(" ") }
+        assertThatThrownBy { ProductName(" ") }
             .isInstanceOf(IllegalArgumentException::class.java)
     }
 }

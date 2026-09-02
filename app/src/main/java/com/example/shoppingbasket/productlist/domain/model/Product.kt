@@ -1,4 +1,4 @@
-package com.example.shoppingbasket.productlist.model
+package com.example.shoppingbasket.productlist.domain.model
 
 import com.example.shoppingbasket.common.model.Money
 import com.example.shoppingbasket.common.model.Quantity

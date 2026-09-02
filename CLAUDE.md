@@ -50,11 +50,13 @@
 |---|---|---|
 | **View (UI)** | `<기능>/view/` | Composable 화면·컴포넌트, Activity. 입출력(표시·이벤트 전달)만 담당 |
 | **ViewModel** | `<기능>/viewmodel/` | 흐름 제어. UiState 를 만들고 View 이벤트를 받아 Domain 을 호출 |
-| **Domain / Model** | `<기능>/model/` | 핵심 비즈니스 로직, Entity, Repository |
+| **Domain** | `<기능>/domain/model/`, `<기능>/domain/repository/` | 핵심 비즈니스 로직, Entity, Repository **인터페이스** |
+| **Data** | `<기능>/data/remote/`, `<기능>/data/repository/` | 외부 데이터 소스(API, DTO), Repository **구현체** |
 
 - **의존성 방향은 항상 안쪽(Domain)을 향한다.** Domain 은 View 를 모른다.
 - ViewModel 은 Android/Compose 타입을 알지 않는다 (`Context`, `Composable`, `View` import 금지).
 - 핵심 로직은 UI 없이 테스트 가능해야 한다.
+- Data 는 Domain 의 Repository 인터페이스를 구현한다 (DIP). Domain 은 Data 를 모른다 — Domain 코드에서 `data.remote`/`data.repository` import 금지.
 
 ### 3.2 UseCase 사용 기준
 
@@ -70,18 +72,27 @@
 ```
 com.example.shoppingbasket
 ├── login/
-│   ├── model/       LoginRepository, LoginUser, ... (데이터 소스 · 도메인 모델)
-│   ├── view/        LoginActivity, LoginScreen.kt (@Composable), 하위 컴포넌트
-│   └── viewmodel/   LoginViewModel, LoginUiState
+│   ├── data/
+│   │   ├── remote/          LoginApi 등 외부 데이터 소스
+│   │   └── repository/      LoginRepositoryImpl — domain.repository.LoginRepository 구현체
+│   ├── domain/
+│   │   ├── model/           LoginUser 등 도메인 엔티티
+│   │   └── repository/      LoginRepository 인터페이스
+│   ├── view/                LoginActivity, LoginScreen.kt (@Composable), 하위 컴포넌트
+│   └── viewmodel/           LoginViewModel, LoginUiState
 ├── basket/
-│   ├── model/
+│   ├── data/
+│   ├── domain/
 │   ├── view/
 │   └── viewmodel/
-├── common/          base, util, ext 등 기능 간 공유 코드
-└── ui/theme/        Color.kt, Theme.kt, Type.kt (Compose 테마)
+├── common/                  base, util, ext 등 기능 간 공유 코드
+└── ui/theme/                Color.kt, Theme.kt, Type.kt (Compose 테마)
 ```
 
-새 화면을 추가할 때는 이 3단(model/view/viewmodel) 구조를 그대로 따른다. 기존 코드가 이 구조를 벗어나 있으면 리팩터링해서 맞춘다.
+- 새 화면을 추가하거나 기존 화면을 리팩터링할 때는 이 4단(data/domain/view/viewmodel) 구조를 따른다.
+- `domain/repository`에는 인터페이스만, `data/repository`에는 그 구현체만 둔다 (DIP, 3.1 참고). `data`는 `domain`에 의존하고 그 반대는 성립하지 않는다.
+- 인터페이스가 구현체를 하나만 가지고 테스트 대역도 필요 없을 만큼 단순한 경우(3.2 과도한 추상화 회피 원칙 참고)는 `domain/repository`를 생략하고 `data/repository`의 구현체를 바로 노출해도 된다.
+- 아직 이 구조로 옮기지 못한 기존 코드(`model/` 하나로만 되어 있는 기능)는 해당 기능을 다음에 손댈 때 리팩터링해서 맞춘다. 한 번에 전체를 옮기지 않는다.
 
 ### 3.4 데이터 흐름
 
@@ -359,7 +370,7 @@ class BasketItemsTest {
 | 대상 | 위치 | 프레임워크 |
 |---|---|---|
 | ViewModel | `app/src/test/` | JUnit5 + AssertJ, 코루틴은 `runTest` + TestDispatcher |
-| Model / Repository / UseCase / util | `app/src/test/` | JUnit5 + AssertJ |
+| Domain(model/repository) / Data(remote/repository) / UseCase / util | `app/src/test/` | JUnit5 + AssertJ |
 | Activity, Composable Screen, UI 컴포넌트 | `app/src/androidTest/` | JUnit4 + `createAndroidComposeRule` / `createComposeRule` |
 
 - 이름 규칙: `LoginViewModel` → `LoginViewModelTest`, `LoginScreen.kt` → `LoginScreenTest`

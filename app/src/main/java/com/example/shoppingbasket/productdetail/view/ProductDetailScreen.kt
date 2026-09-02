@@ -36,10 +36,10 @@ import com.example.shoppingbasket.common.view.ShoppingButton
 import com.example.shoppingbasket.common.view.ShoppingTopBar
 import com.example.shoppingbasket.common.view.Stepper
 import com.example.shoppingbasket.productdetail.viewmodel.ProductDetailUiState
-import com.example.shoppingbasket.productlist.model.Product
-import com.example.shoppingbasket.productlist.model.ProductId
-import com.example.shoppingbasket.productlist.model.ProductImageUrl
-import com.example.shoppingbasket.productlist.model.ProductName
+import com.example.shoppingbasket.productlist.domain.model.Product
+import com.example.shoppingbasket.productlist.domain.model.ProductId
+import com.example.shoppingbasket.productlist.domain.model.ProductImageUrl
+import com.example.shoppingbasket.productlist.domain.model.ProductName
 import com.example.shoppingbasket.ui.theme.ShoppingBasketTheme
 
 @Composable

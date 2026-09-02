@@ -44,7 +44,7 @@ import com.example.shoppingbasket.R
 import com.example.shoppingbasket.common.ext.noRippleClickable
 import com.example.shoppingbasket.common.view.ShoppingButton
 import com.example.shoppingbasket.common.view.ShoppingTopBar
-import com.example.shoppingbasket.productlist.model.Product
+import com.example.shoppingbasket.productlist.domain.model.Product
 import com.example.shoppingbasket.productlist.viewmodel.ProductListItem
 import com.example.shoppingbasket.productlist.viewmodel.ProductListUiState
 

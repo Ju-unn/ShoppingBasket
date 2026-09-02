@@ -1,4 +1,4 @@
-package com.example.shoppingbasket.productlist.model
+package com.example.shoppingbasket.productlist.domain.model
 
 @JvmInline
 value class ProductName(private val value: String) {

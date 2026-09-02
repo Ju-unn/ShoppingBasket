@@ -2,7 +2,7 @@ package com.example.shoppingbasket.basket.model
 
 import com.example.shoppingbasket.common.model.Page
 import com.example.shoppingbasket.common.model.Quantity
-import com.example.shoppingbasket.productlist.model.Product
+import com.example.shoppingbasket.productlist.domain.model.Product
 
 // 백엔드 연동 전까지 인메모리로 장바구니 상태를 보관한다.
 // 여러 화면의 ViewModel 이 같은 인스턴스를 주입받아 장바구니를 공유한다.

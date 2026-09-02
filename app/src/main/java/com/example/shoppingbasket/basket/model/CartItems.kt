@@ -3,7 +3,7 @@ package com.example.shoppingbasket.basket.model
 import com.example.shoppingbasket.common.model.Money
 import com.example.shoppingbasket.common.model.Page
 import com.example.shoppingbasket.common.model.Quantity
-import com.example.shoppingbasket.productlist.model.Product
+import com.example.shoppingbasket.productlist.domain.model.Product
 
 class CartItems(private val items: List<CartItem>) {
 

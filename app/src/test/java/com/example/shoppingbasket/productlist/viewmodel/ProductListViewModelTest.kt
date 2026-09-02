@@ -6,7 +6,7 @@ import com.example.shoppingbasket.common.fixture.fakeProductRepository
 import com.example.shoppingbasket.common.fixture.fakeProductResponses
 import com.example.shoppingbasket.common.fixture.testProduct
 import com.example.shoppingbasket.productdetail.viewmodel.ProductDetailViewModel
-import com.example.shoppingbasket.productlist.model.ProductRepository
+import com.example.shoppingbasket.productlist.data.repository.ProductRepositoryImpl
 import com.example.shoppingbasket.recentlyviewed.model.RecentlyViewedRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
@@ -182,7 +182,7 @@ class ProductListViewModelTest {
     @DisplayName("생성 시 로딩 상태로 시작해 서버 응답을 받으면 로딩이 끝난다")
     fun startsLoadingThenFinishesOnResponse() {
         val manualApi = ManualProductApi()
-        val viewModel = ProductListViewModel(cartRepository, repository = ProductRepository(manualApi))
+        val viewModel = ProductListViewModel(cartRepository, repository = ProductRepositoryImpl(manualApi))
         assertThat(viewModel.uiState.value.isLoading).isTrue()
 
         manualApi.completeWith(fakeProductResponses())

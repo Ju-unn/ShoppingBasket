@@ -1,7 +1,7 @@
 package com.example.shoppingbasket.productdetail.viewmodel
 
 import com.example.shoppingbasket.common.model.Quantity
-import com.example.shoppingbasket.productlist.model.Product
+import com.example.shoppingbasket.productlist.domain.model.Product
 
 data class ProductDetailUiState(
     val product: Product? = null,

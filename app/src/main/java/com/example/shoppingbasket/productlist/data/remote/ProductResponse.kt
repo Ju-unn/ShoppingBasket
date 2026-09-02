@@ -1,6 +1,10 @@
-package com.example.shoppingbasket.productlist.model
+package com.example.shoppingbasket.productlist.data.remote
 
 import com.example.shoppingbasket.common.model.Money
+import com.example.shoppingbasket.productlist.domain.model.Product
+import com.example.shoppingbasket.productlist.domain.model.ProductId
+import com.example.shoppingbasket.productlist.domain.model.ProductImageUrl
+import com.example.shoppingbasket.productlist.domain.model.ProductName
 import kotlinx.serialization.Serializable
 
 // 서버(GET /products) 응답을 그대로 옮겨 담는 DTO.

@@ -4,15 +4,16 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.shoppingbasket.basket.model.CartRepository
-import com.example.shoppingbasket.productlist.model.Product
-import com.example.shoppingbasket.productlist.model.ProductRepository
+import com.example.shoppingbasket.productlist.data.repository.ProductRepositoryImpl
+import com.example.shoppingbasket.productlist.domain.model.Product
+import com.example.shoppingbasket.productlist.domain.repository.ProductRepository
 import com.example.shoppingbasket.recentlyviewed.model.RecentlyViewedRepository
 
 class ProductDetailViewModel(
     productKey: String,
     private val cartRepository: CartRepository,
     private val recentlyViewedRepository: RecentlyViewedRepository = RecentlyViewedRepository(),
-    productRepository: ProductRepository = ProductRepository()
+    productRepository: ProductRepository = ProductRepositoryImpl()
 ) : ViewModel() {
 
     private val _uiState = mutableStateOf(loadedState(productRepository.findById(productKey)))

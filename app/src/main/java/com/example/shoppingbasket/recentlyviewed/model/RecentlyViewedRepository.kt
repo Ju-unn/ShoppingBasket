@@ -1,6 +1,6 @@
 package com.example.shoppingbasket.recentlyviewed.model
 
-import com.example.shoppingbasket.productlist.model.Product
+import com.example.shoppingbasket.productlist.domain.model.Product
 
 // 백엔드/Room 연동 전까지 인메모리로 최근 본 상품을 보관한다 (CartRepository 와 같은 구조).
 // 화면 간에는 변경 리스너로 동기화한다 (코루틴 도입 전까지의 3단계 확정 방식).
