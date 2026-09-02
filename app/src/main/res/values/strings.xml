@@ -16,4 +16,5 @@
     <string name="add_to_cart_icon_description">장바구니에 담기</string>
     <string name="recently_viewed_section_title">최근 본 상품</string>
     <string name="last_viewed_section_title">마지막으로 본 상품</string>
+    <string name="loading_products_description">상품 불러오는 중</string>
 </resources>

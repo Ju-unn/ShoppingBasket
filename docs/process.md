@@ -10,8 +10,8 @@
 |---|---|---|---|
 | 1단계 | 상품 목록 / 상품 상세 / 장바구니 (기본 흐름) | ✅ 완료 | ✅ 완료 |
 | 2단계 | 상품 목록 더보기(페이지네이션), 장바구니 페이징(5개 이하/초과/마지막 페이지) | ✅ 완료 | ✅ 이미지·TopBar 정리 완료 |
-| 3단계 | 수량 조절 (상품목록/상품상세/장바구니에서 +-) | ❌ 미착수 | ✅ 이미지·TopBar 정리 완료 |
-| 4단계 | 최근 본 상품 (목록 하단 섹션 + 상세의 마지막으로 본 상품) | ❌ 미착수 | ✅ 이미지·TopBar 정리 완료 |
+| 3단계 | 수량 조절 (상품목록/상품상세/장바구니에서 +-) | ✅ 완료 (2026-09-01, PR #7~#14 병합) | ✅ 이미지·TopBar 정리 완료 |
+| 4단계 | 최근 본 상품 + HTTP Client (목록 상단 섹션 + 상세의 마지막으로 본 상품 + 로컬 서버 연동) | 🚧 계획 중 (아래 "4단계 준비" 참고) | ✅ 이미지·TopBar 정리 완료 |
 | 5단계 | 로딩 스켈레톤 (상품목록/장바구니) | ❌ 미착수 | ✅ (스켈레톤이라 이미지 자체가 필요 없음) |
 | 6단계 | 장바구니 선택창(체크박스 선택 후 주문), 추가 상품 추천 | ❌ 미착수 | ✅ 이미지·TopBar 정리 완료 |
 | 7단계 | (pen 상에 대응 화면 없음 — 확인 필요) | ❌ 미착수 | — |
@@ -61,6 +61,23 @@
 - `BasketViewModel` / `ProductDetailViewModel` 이 생성자로 저장소를 받는다
 - 테스트가 각자 새 저장소를 만들어 쓰게 되어 **전역 상태 청소(`CartRepositoryFixture`)를 삭제**했다
 - `ShoppingBasketApplicationTest` 추가 (계측 31 → 33개)
+
+### 6. 3단계 기능 구현 완료 (2026-09-01)
+
+계획대로 5개 브랜치를 도메인 → 공용 뷰 → 화면별 순서로 진행, 전부 `master` 에 병합했다.
+
+| # | 브랜치 | PR | 내용 |
+|---|---|---|---|
+| 1 | `feature/basket-quantity-model` | #9 | `Quantity.decreased()/isMinimum()`, `CartItem.decreased()`, `CartItems.increase/decrease/quantityOf/totalQuantity`, `CartRepository` 증감 위임 + 변경 리스너 |
+| 2 | `feature/common-stepper` | #10 | 공용 `Stepper` 컴포저블 (126×42, pen 기준) |
+| 3 | `feature/productlist-quantity` | #11 | 목록 담기버튼↔Stepper 전환, 상단바 총 수량 배지, 리스너로 장바구니 변경 반영 |
+| 4 | `feature/productdetail-quantity` | #13 | 상세 로컬 수량 Stepper + 수량×단가 총액 표시 |
+| 5 | `feature/basket-quantity-ui` | #14 | 장바구니 카드 안 Stepper, `BasketViewModel` 증감 + 변경 리스너 |
+
+- 최종 병합 커밋: `6f2a93d` (`master`)
+- 단위 테스트(JUnit5+AssertJ) + 계측 테스트(JUnit4, 에뮬레이터 `Medium_Phone(AVD) - 16`) 51개 전부 통과 확인
+- 진행 중 계측 테스트 1건 발견·수정: `BasketScreenTest.displaysPagingControlWhenMorePagesRemain` 가 `onNodeWithText("1")` 로 페이지 번호를 찾았는데, 카드 수량(Stepper)도 "1"을 표시해 텍스트가 겹쳐 실패 → 테스트용 수량을 2로 바꿔 해결 (프로덕션 로직 문제 아님)
+- 결정 6-1~6-6번(위 "3단계 설계 결정" 표)이 실제 구현 기준으로 그대로 적용됨
 
 ## 결정 사항 (이 프로젝트 한정)
 
@@ -133,31 +150,18 @@ CLAUDE.md 를 고치지 말고 여기에 기록한다.**
 
 ## 다음 단계
 
-### 지금 상태 (2026-08-22 기준) ⚠️ 이어받을 때 먼저 확인할 것
+### 지금 상태 (2026-09-01 기준) ⚠️ 이어받을 때 먼저 확인할 것
 
 | 브랜치 | 상태 |
 |---|---|
-| `master` | `01f34ee` (PR #6 머지됨). origin 과 동일 |
-| `refactor/cart-repository-injection` | **작업 완료 · 커밋/푸시 전.** 위 "지금까지 한 일" 5번 내용이 여기 들어 있다 |
-| `feature/basket-quantity-model` | 만들어만 두고 비어 있음 (`master` 와 동일). 위 리팩터링이 머지된 뒤 여기서 이어간다 |
+| `master` | `6f2a93d` (PR #14 까지 전부 머지됨). 열려 있는 작업 브랜치 없음, 워킹 트리 클린 |
 
-**다른 기기에서 이어가려면 `refactor/cart-repository-injection` 을 먼저 커밋·푸시해야 한다.**
-커밋 메시지 초안:
+3단계(수량 조절)는 완료됐다. 다음 차례는 4단계(최근 본 상품 + HTTP Client) — 아래 "4단계 준비" 참고.
 
-```
-refactor(basket): CartRepository 를 주입 가능한 클래스로 전환
+### 3단계 브랜치 계획 — 완료 (기록용)
 
-- object 싱글턴을 class 로 바꾸고 ShoppingBasketApplication 이 인스턴스를 보관
-- BasketViewModel / ProductDetailViewModel 이 생성자로 저장소를 주입받도록 변경
-- 테스트가 각자 새 저장소를 쓰게 되어 전역 상태 청소(CartRepositoryFixture) 제거
-- ShoppingBasketApplicationTest 추가 (계측 31 -> 33개)
-```
-
-검증 결과: 단위 102개 + 계측 33개 전부 통과, `lintDebug` Error 0.
-
-### 3단계 브랜치 계획 (5개)
-
-2단계와 같은 순서(도메인 → 공용 뷰 → 화면별)이고 각각 PR 하나다.
+실제 진행 내역은 위 "지금까지 한 일" 6번 참고. 아래는 착수 전 세운 계획으로, 실행 순서·내용이
+그대로 지켜졌다.
 
 | # | 브랜치 | 내용 |
 |---|---|---|
@@ -167,29 +171,7 @@ refactor(basket): CartRepository 를 주입 가능한 클래스로 전환
 | 4 | `feature/productdetail-quantity` | 상세 수량 조절 + 총액 반영 |
 | 5 | `feature/basket-quantity-ui` | 장바구니 카드 안 Stepper |
 
-**1번 브랜치에서 할 일:**
-
-```kotlin
-// common/model/Quantity.kt
-fun decreased(): Quantity        // 1 밑으로는 못 내려감
-fun isMinimum(): Boolean
-
-// basket/model/CartItems.kt
-fun increase(key: String): CartItems
-fun decrease(key: String): CartItems
-fun quantityOf(product: Product): Quantity?   // null = 장바구니에 없음
-fun totalQuantity(): Int                      // 상단바 배지용
-
-// basket/model/CartRepository.kt
-fun increase(key: String) / decrease(key: String)
-+ 변경 리스너 등록/해제 (결정 6-4번)
-```
-
-`Quantity` 는 `require(value >= 1)` 이라 0을 표현할 수 없다. 이 제약은 **유지**하고
-"장바구니에 없음"은 `quantityOf()` 가 `null` 을 돌려주는 것으로 구분한다.
-(`Quantity(0)` 을 허용하면 "0개짜리 장바구니 항목"이라는 말이 안 되는 상태가 생긴다.)
-
-### 3단계 pen 스펙 (측정값)
+### 3단계 pen 스펙 (측정값, 구현에 그대로 반영됨)
 
 **재사용 컴포넌트 `Stepper`(jxIE5)** — 결정 6-1번에 따라 이쪽을 따른다
 
@@ -219,13 +201,12 @@ fun increase(key: String) / decrease(key: String)
 
 1. **`ShoppingBasketApplication.cartRepository` 가 public `val` 이다.**
    CLAUDE.md 4.9(프로퍼티 노출 금지)에 걸리지만 Domain 이 아니라 프레임워크/DI 계층이라 예외로 뒀다.
-   함수로 바꿀지 결정 필요
+   함수로 바꿀지 결정 필요 (미해결)
 2. **계측 테스트가 여전히 raw `assert()` 를 쓴다.** AssertJ 가 `androidTestImplementation` 에 없다.
-   의존성 추가는 사용자 승인이 필요해 손대지 않았다 (아래 "남긴 것" 과 같은 항목)
-3. **결정 6-1번(재사용 컴포넌트 기준)의 부작용**: 상세 화면에서 Stepper 가 흰 배경 위에 놓이는데,
-   컴포넌트에 `gray-border` 테두리가 있어 다행히 보인다. 다만 화면 프레임 쪽 디자인(테두리 없음,
-   22sp 회색)과 실제 화면이 달라 보이게 되므로, 구현 후 눈으로 한 번 확인이 필요하다
-4. **결정 6-2번(수량 1에서 제거)은 pen 에 없는 동작이다.** 미션의 "B마트 UX 참고" 를 근거로 정했다
+   의존성 추가는 사용자 승인이 필요해 손대지 않았다 (미해결, 아래 "남긴 것" 참고)
+3. ~~결정 6-1번(재사용 컴포넌트 기준)의 부작용 확인~~ → **해결됨.** 3단계 구현 완료 후 pen 스크린샷과
+   대조해 상품목록/상세/장바구니 3곳 모두 눈으로 확인함
+4. **결정 6-2번(수량 1에서 제거)은 pen 에 없는 동작이다.** 미션의 "B마트 UX 참고" 를 근거로 정했다 (기록용, 조치 불필요)
 
 ### 아직 남긴 것 (2단계에서 이월)
 
@@ -236,6 +217,151 @@ fun increase(key: String) / decrease(key: String)
 - ~~계측 테스트를 실행하지 못했다~~ → **해결됨.** 에뮬레이터(`Medium_Phone_API_36`)에서 33개 통과
 - ~~`BasketViewModel` 이 `CartRepository` 싱글턴을 직접 참조한다~~ → **해결됨** (지금까지 한 일 5번)
 
+## 4단계 준비 (2026-09-01)
+
+미션 원문(1~4단계)을 사용자가 다시 공유했다. 미션 원문은 **RecyclerView + Activity + XML** 전제로
+쓰여 있지만, 이 프로젝트는 1단계 때부터 **Jetpack Compose + Navigation Compose + 단일 Activity** 로
+가기로 이미 정한 상태다(위 결정 사항들 참고). 4단계도 이 전제를 유지한다 — **XML 로 새로 만들지 않고
+Compose 로 구현한다.** 아래는 미션 원문 요구사항을 이 프로젝트 아키텍처 기준으로 재정리한 것이다.
+
+### 미션 원문 요구사항 vs 이 프로젝트 상태
+
+| 요구사항 | 상태 |
+|---|---|
+| 최근 본 상품 목록 상단 섹션 (최대 10개) | ❌ 미착수 |
+| 상품 상세에 마지막으로 본 상품 1개 노출 (자기 자신 제외) | ❌ 미착수 |
+| 마지막으로 본 상품 화면에서 뒤로가기 → 상품 목록 | ❌ 미착수 |
+| 앱 재시작해도 최근 본 상품·장바구니 유지 (Room) | ❌ 미착수 — Room 의존성 자체가 없음 |
+| 상품 목록 HTTP Client 구현 (OkHttp) | ❌ 미착수 — `ProductRepository` 가 인메모리 목업 50개 |
+| MockWebServer 로 테스트 환경 구성 | ❌ 미착수 |
+| (힌트) Activity Result API | 해당 없음 — 단일 Activity + Compose Navigation 이라 애초에 안 씀 (3단계와 동일 이유) |
+| (힌트) Intent Flag 로 뒤로가기 제어 | **Compose Navigation 등가물로 대체.** `navigate(popUpTo=...)` 로 백스택 정리 (아래 결정 사항 8번) |
+
+### 이번에 새로 생긴 조건
+
+- **서버는 로컬로 준비한다.** 원격 배포가 아니라 개발 PC에서 직접 띄우는 것을 전제로 함
+- **로컬 서버 구성 방식은 그릴링으로 확정했다.** Docker 는 안 쓰고 Ktor 로 간다 (아래 결정 사항 2번)
+
+### 7. 4단계 설계 결정 (2026-09-01, 그릴링으로 확정)
+
+`/grill-me` 로 4단계의 애매한 지점을 정리했다. 아래로 확정.
+
+| # | 쟁점 | 결정 |
+|---|---|---|
+| 1 | Room 도입에 따라 코루틴을 지금 도입할지 | **보류 유지.** Room/네트워크 모두 수동 스레드 처리(`Executor`)로 감싼다. 코루틴 도입은 계속 미룬다 |
+| 2 | 로컬 서버 스택 | **Ktor**(Kotlin). 이 PC에 Docker 는 없고 Node(v24) 는 있지만, 새 언어/새 도구 없이 기존 JDK·Gradle 로 바로 시작 가능해서 선택 |
+| 3 | 서버 코드 위치 | 이 저장소 **같은 곳에 별도 최상위 폴더**(예: `server/`)로 둔다. 별도 저장소로 안 쪼갠다 |
+| 4 | 안드로이드 HTTP 클라이언트 | **Retrofit + kotlinx.serialization 컨버터.** 단, 코루틴을 안 쓰므로 `suspend fun` 대신 `Call<T>.enqueue(callback)` 방식으로 쓴다 |
+| 5 | HTTP Client 적용 범위 | **상품 목록 조회(`GET /products`)만** 서버화. 상품 상세는 목록 조회 때 받은 `Product` 를 재사용하고 별도 네트워크 호출을 하지 않는다 |
+| 6 | Room 적용 범위 | **최근 본 상품 + 장바구니 둘 다.** 미션 요구사항이 "장바구니 데이터도 유지"를 명시하므로 `CartRepository` 도 영속 대상에 포함 |
+| 7 | 최근 본 상품 기록 정책 | 상세 화면 **진입 즉시** 기록. 이미 있던 상품을 재방문하면 **중복 추가하지 않고 순서만 맨 앞으로 갱신** |
+| 8 | 상세 → 목록 뒤로가기 | "마지막으로 본 상품" 카드로 진입한 상세에서는 `navigate(...) { popUpTo(ROUTE_PRODUCT_LIST) }` 로 백스택을 정리해, 뒤로가기 한 번에 항상 상품 목록으로 가게 한다 |
+| 9 | 개발 중 테스트 환경 | **에뮬레이터만.** `baseUrl` 은 `http://10.0.2.2:PORT/` 고정. 실기기 테스트는 필요해지면 나중에 추가 |
+| 10 | Room 을 코루틴 없이 접근하는 방식 | **기존 인메모리 저장소(`CartRepository`, 신설 최근본상품 저장소)는 그대로 두고**, Room 은 저장/복원 전용 얇은 뒷단으로만 붙인다. 변경이 생기면 백그라운드 `Executor` 에 "DB 에 써줘"만 던지고 결과를 기다리지 않는다(fire-and-forget). 앱 시작 시 한 번만 같은 스레드에서 DB 를 읽어 인메모리 저장소를 채운다 |
+| 11 | (2026-09-02) pen 에 "최근 본 상품"/"마지막으로 본 상품"의 정의가 2개(재사용 컴포넌트 `RecentItem`/`LastViewed` vs 실제 화면 `buA3e`/`zDK6R`/`kZ4dp` 인스턴스)라 모순 | **실제 화면 인스턴스 기준.** 컴포넌트 쪽(사진만 있고 이름 없음 / 회색 배경에 이름만 강조)은 미완성 초안으로 보이고, 실제 화면 쪽이 사진+이름 또는 라벨+상품명을 갖춘 완성된 형태라 이쪽을 따른다 (아래 "4단계 pen 스펙" 참고) |
+
+**결정 1번의 의미**: 지금까지 미뤄온 코루틴 도입을 4단계에서도 계속 미룬다는 뜻이다. 대신 Room·Retrofit
+접근은 전부 수동 스레드 전환(`Executor`, 콜백)으로 처리한다. 나중에 코루틴을 도입하면 이 부분들을
+`suspend`/`Flow` 로 한꺼번에 정리하면 된다.
+
+**결정 10번의 의미**: 1~3단계에서 이미 완성된 `CartRepository`/리스너 패턴을 건드리지 않는다. Room 은
+"가끔 조용히 저장·복원해주는 뒷단"으로만 붙어서, 기존 코드 변경 범위를 최소화한다.
+
+### 4단계에서 새로 필요한 것 (승인 필요 — CLAUDE.md "새 의존성은 먼저 물어본다")
+
+- `androidx.room:room-runtime` / `room-ktx` / `room-compiler`(KSP) — 최근 본 상품·장바구니 영속화 (결정 6, 10번)
+- `com.squareup.retrofit2:retrofit` + `converter-kotlinx-serialization` (+ `org.jetbrains.kotlinx:kotlinx-serialization-json`) — 상품 목록 HTTP Client (결정 4번)
+- 테스트: `com.squareup.okhttp3:mockwebserver`
+- 서버 쪽(`server/` 폴더, Ktor 프로젝트)은 이 안드로이드 앱의 `libs.versions.toml` 범위 밖 — 별도 Gradle 설정 필요 (결정 2, 3번)
+
+### 4단계 pen 스펙 (측정값, 결정 11번 — 실제 화면 인스턴스 기준)
+
+**상품 목록 - 최근 본 상품**(`buA3e`/`zDK6R`) — TopBar 바로 아래, 그리드 위에 위치
+
+- 섹션 제목 "최근 본 상품": (20,76), 16sp **Bold** `black`
+- 아이템: 98×98 사진(cornerRadius 없음) + 사진 아래 상품명, 아이템 간격 8dp(첫 아이템 x=20 기준 106 간격)
+  - 상품명: 12sp **Bold** `#333333`(신규 색상 `gray_3` 필요), 사진과 4dp 간격, 1줄
+- 4번째 아이템이 프레임 폭(360)을 넘어 잘려 보임 → **가로 스크롤** 목록(`LazyRow`)임을 뜻함
+- 섹션 아래 구분선: 두께 7dp, 색상 `#EBEBEB`(신규 색상 `gray_divider` 필요), 전체 폭
+- 최근 본 상품이 없으면 섹션 전체를 그리지 않는다 (별도 pen 화면 없음 — 자연스러운 추론)
+
+**상품 상세 - 마지막으로 본 상품**(`kZ4dp`) — 가격/수량 행과 "장바구니 담기" 버튼 사이
+
+- 카드: 324×80(상세 화면 좌우 패딩 18dp 안쪽 폭과 동일), cornerRadius 4, 흰 배경, `gray_border` 1px 테두리
+- 라벨 "마지막으로 본 상품": 카드 안 (18,16), 12sp **Bold** `primary`
+- 상품명: 카드 안 (18,40), 18sp Regular `gray_5`
+- 가격/수량 행(y=495~537) 과 카드(y=557) 사이 간격 20dp
+- 마지막으로 본 상품이 없으면(자기 자신 제외 후 없음) 카드를 그리지 않는다
+
+### 4단계 브랜치 1 완료 (2026-09-02)
+
+- `recentlyviewed/model/RecentlyViewedProducts.kt`: 일급 컬렉션. `viewed()`(최대 10개, 중복 시 맨 앞으로 재정렬), `latestExcluding()`
+- `recentlyviewed/model/RecentlyViewedRepository.kt`: 인메모리 저장소, `CartRepository` 와 동일한 변경 리스너 패턴
+- `ShoppingBasketApplication` 에 `recentlyViewedRepository` 보관 (`cartRepository` 와 동일하게 프레임워크 계층 예외)
+- `ShoppingBasketApplicationTest` 에 `sharesSingleRecentlyViewedRepository` 계측 테스트 추가 (`sharesSingleCartRepository` 와 동일 패턴)
+- 단위 테스트: `RecentlyViewedProductsTest`(5개), `RecentlyViewedRepositoryTest`(4개) — 전부 통과
+- 확인 완료: `assembleDebug` 빌드 성공, `testDebugUnitTest` 전체 통과(신규 테스트 포함 무실패), `connectedAndroidTest` 전체 52개 통과(`sharesSingleRecentlyViewedRepository` 포함), 에뮬레이터에 설치 후 실행해 크래시 없음(logcat 확인) — UI 변경이 없는 브랜치라 화면 자체는 기존과 동일
+
+### 4단계 브랜치 2 완료 (2026-09-02) — `feature/productlist-recentlyviewed-ui`
+
+- `colors.xml`: `gray_3`(`#FF333333`), `gray_divider`(`#FFEBEBEB`) 추가 (pen 스펙 신규 색상)
+- `strings.xml`: `recently_viewed_section_title`("최근 본 상품") 추가
+- `ProductListUiState`: `recentlyViewed: List<Product>` 필드 추가 (기본값 빈 목록)
+- `ProductListViewModel`: `RecentlyViewedRepository` 의존성 추가(기본값 있는 파라미터라 기존 테스트는 그대로 통과), 변경 리스너 구독으로 다른 화면에서 최근 본 상품이 바뀌면 목록 화면도 갱신(`refreshCartState` → `refreshState` 로 통합해 재사용)
+- `ShoppingBasketApplication`/`MainActivity`: `CreationExtras.recentlyViewedRepository()` 확장 함수 추가, `ProductListViewModel` 생성 시 주입
+- `ProductListScreen.kt`: `RecentlyViewedSection`(제목 + `LazyRow`) / `RecentlyViewedItem`(98×98 이미지 + 12sp Bold `gray_3` 이름) 컴포저블 추가, 목록이 비어 있으면 섹션 자체를 그리지 않음, 아래에 7dp `gray_divider` 구분선. 항목 클릭 시 기존 `onProductClick` 재사용해 상세로 이동
+  - 섹션 제목-상단 간격(pen 미기재, 콘텐츠 패딩 20dp 값과 통일해 20dp로 결정) 등 pen에 없는 세부 여백은 기존 화면의 20dp/12dp 패딩 체계에 맞춰 정함
+- 단위 테스트: `ProductListUiStateTest`(신규 1개), `ProductListViewModelTest`(신규 2개) — 전부 통과
+- 계측 테스트: `ProductListScreenTest`(신규 3개: 빈 목록 시 섹션 미표시, 목록 있을 때 섹션 표시, 항목 클릭 콜백) — 전부 통과
+- 확인 완료: `assembleDebug` 빌드 성공, `testDebugUnitTest` 전체 통과, `connectedAndroidTest` 전체 55개 통과(신규 3개 포함, 0 실패), 에뮬레이터 설치 후 실행해 크래시 없음(logcat, 프로세스 생존 확인) — 최근 본 상품 저장소가 아직 비어 있어(기록은 3번 브랜치에서 추가) 섹션은 정상적으로 숨겨진 상태로 렌더링됨, 데이터가 있을 때의 렌더링은 계측 테스트로 검증
+
+### 4단계 브랜치 3 완료 (2026-09-02) — `feature/productdetail-recentlyviewed`
+
+- `ProductDetailUiState`: `lastViewedProduct: Product?` 필드 추가 (기본값 없음, 자기 자신 제외 후 없으면 null)
+- `ProductDetailViewModel`: `RecentlyViewedRepository` 의존성 추가(기본값 있는 파라미터). 진입 즉시 `recordViewed()` 로 기록하고, `latestExcluding()` 로 자기 자신을 제외한 마지막 상품을 상태에 담음
+- `ProductDetailScreen.kt`: 가격/수량 행과 "장바구니 담기" 버튼 사이에 `LastViewedSection`/`LastViewedProductCard` 컴포저블 추가 (fillMaxWidth × 80dp, cornerRadius 4, `gray_border` 1px, 라벨 12sp Bold `primary` + 상품명 18sp `gray_5`), 상품 없으면 섹션 자체를 그리지 않음. 카드 클릭 시 `onLastViewedClick(key)` 호출
+  - 라벨-상품명 간 8dp 스페이서로 pen의 (18,16)/(18,40) 상대 좌표 근사(텍스트 라인 높이 포함 시 목표 24dp 간격에 근접) — 기존 화면들의 스페이서 기반 근사 패턴과 동일
+  - Compose `@Preview` 2개 추가(마지막 본 상품 있음/없음)로 에뮬레이터 없이도 레이아웃 확인 가능하게 함
+- `MainActivity.kt`: `ProductDetailViewModel` 생성 시 `recentlyViewedRepository()` 주입, `onLastViewedClick` 에서 `navigate("productDetail/$id") { popUpTo(ROUTE_PRODUCT_LIST) }` 사용해 뒤로가기 시 항상 목록으로 이동(결정 8번)
+- `RecentlyViewedRepository`: 계측 테스트 간 Application 수명 상태 격리를 위한 `clear()` 추가 (CartRepository 의 remove 패턴과 동일 목적)
+- `MainActivityTest`: `@Before` 에서 `recentlyViewedRepository.clear()` 도 함께 호출하도록 수정 — 브랜치 3 도입 전에는 최근 본 상품이 없어 드러나지 않았던 테스트 간 상태 누수(같은 상품명이 "최근 본 상품" 섹션과 그리드에 동시에 노출되어 `onNodeWithText` 가 노드 2개를 찾는 문제)가 발견되어 함께 수정
+- 단위 테스트: `ProductDetailUiStateTest`(신규 1개), `ProductDetailViewModelTest`(신규 3개: 기록 확인/최초 방문 시 null/자기 자신 제외), `RecentlyViewedRepositoryTest`(신규 1개: `clear()`) — 전부 통과
+- 계측 테스트: `ProductDetailScreenTest`(신규 3개: 카드 없음/있음/클릭 콜백) — 전부 통과
+- 확인 완료: `assembleDebug` 빌드 성공, `testDebugUnitTest` 전체 통과, `connectedAndroidTest` 전체 58개 통과(신규 4개 포함, 0 실패). 에뮬레이터에 실제 설치 후 상품 A→B 순서로 상세 진입 시 "마지막으로 본 상품" 카드가 자기 자신을 제외하고 정확히 노출됨을 스크린샷으로 확인, 카드 클릭 시 해당 상품 상세로 이동 후 뒤로가기 한 번에 목록 화면으로 바로 돌아가는 `popUpTo` 동작도 실기기에서 확인, logcat 에 FATAL EXCEPTION 없음
+
+### 4단계 브랜치 4 완료 (2026-09-02) — `chore/server-ktor-setup`
+
+- 저장소 최상위에 안드로이드 앱과 완전히 별개인 Gradle 프로젝트 `server/` 신설(결정 2, 3번). 루트 `settings.gradle.kts`에 `include` 하지 않고, 루트의 `gradle-wrapper.jar`/`gradlew`만 복사해 재사용 — `libs.versions.toml` 범위 밖이라는 원칙대로 의존성 버전은 `server/build.gradle.kts`에서 직접 관리
+  - `kotlin("jvm") 2.0.21`(앱과 동일 버전) + `application` 플러그인 + Ktor 2.3.12(`ktor-server-core`/`ktor-server-netty`/`ktor-server-content-negotiation`/`ktor-serialization-kotlinx-json`) + `logback-classic`
+  - JBR(JDK 21)로 빌드하므로 `jvmToolchain(11)` 지정은 넣지 않음(넣으면 로컬에 11 툴체인이 없어 다운로드 설정 없이는 빌드 실패) — 실행 중인 JVM을 그대로 사용
+- `Application.kt`: `embeddedServer(Netty, port = 8080, host = "0.0.0.0")`로 기동, `GET /products` 라우트 하나만 제공(결정 5번 — 목록 조회만 서버화, 상세는 캐시된 데이터 재사용이라 서버에 별도 엔드포인트 불필요)
+- `MockProducts.kt`: 안드로이드 `ProductRepository`의 목업 생성 규칙(모양 5종 × 용량 7종 × 가격 2종, `p1`~`p50`)을 그대로 복제한 `ProductResponse`(id/name/price/imageUrl) 50개 반환 — 두 코드가 물리적으로 분리돼 있어 규칙이 어긋나면 5단계(Retrofit 연동)에서 화면이 달라지므로, 값 일치 여부를 테스트로 고정
+- 테스트: `ApplicationTest.kt` — Ktor `testApplication`으로 `/products` 호출, 200 응답·50개 개수·`p1`(`PET보틀-밀크티병(300ml)`, 12,000원) 값까지 검증
+- 확인 완료
+  1. **빌드 성공** — `server` 디렉터리에서 `./gradlew test` BUILD SUCCESSFUL(컴파일 오류 0, 신설 테스트 통과)
+  2. **실제 실행** — `./gradlew run`으로 실제 기동 후 `curl http://127.0.0.1:8080/products`로 응답 확인: 200 OK, 50개, `p1` 값이 안드로이드 목업과 완전히 일치. 확인 후 프로세스 정상 종료(포트 8080 해제 확인)
+  3. **문서 검증** — 이 섹션 자체가 검증 기록. 안드로이드 앱(`app/`)은 이번 브랜치에서 파일 변경이 없어 기존 `assembleDebug`/테스트 결과에 영향 없음(`git status`로 `app/` 무변경 확인)
+- 에뮬레이터 연동(`baseUrl = http://10.0.2.2:8080/`)은 5단계(`feature/productlist-http-client`, Retrofit 도입)에서 실제로 연결한다. 이번 브랜치는 서버 단독 기동·응답 검증까지가 범위
+
+### 4단계 브랜치 5 완료 (2026-09-02) — `feature/productlist-http-client`
+
+- `libs.versions.toml`에 Retrofit 2.11.0 + `converter-kotlinx-serialization` + `kotlinx-serialization-json` 1.7.3 추가. Retrofit 은 OkHttp 위에서 동작하므로 `okhttp` 도 함께 명시(승인받은 "Retrofit"에 포함된 필수 전이 의존성, 별도 검토 대상 아님). `app/build.gradle.kts`에 `kotlin.plugin.serialization` 플러그인 추가
+- `ProductApi`(신규): `@GET("products") fun fetchProducts(): Call<List<ProductResponse>>` — 코루틴을 아직 안 쓰므로 결정 4번대로 `Call.enqueue` 방식. `baseUrl = http://10.0.2.2:8080/`(결정 9번)
+- `ProductResponse`(신규): 서버 DTO. UiState 와 같은 이유로 OC 7·9번 예외로 두고(JSON 구조를 그대로 표현하는 게 목적), `toProduct()` 확장 함수로 도메인 `Product` 변환을 즉시 끝낸다
+- `ProductRepository`: 로컬 목업 생성 로직을 전부 제거하고 `productApi.fetchProducts().enqueue(...)`로 서버에서 받아 캐시하는 방식으로 전환. `findAll/findPage/hasPageAfter/findById`는 이 캐시를 읽기만 한다. 실패 시(서버 미기동 등) 캐시를 비운 채 로딩만 끝낸다 — 별도 에러 UI·재시도 버튼 없음(사용자 확인, 5단계 확정 사항)
+- 상세 화면이 목록의 캐시를 재사용하려면(결정 5번) 같은 `ProductRepository` 인스턴스를 봐야 하므로, `ShoppingBasketApplication`에 `productRepository`를 추가하고 `MainActivity`에서 두 화면 모두에 공용으로 주입(장바구니/최근 본 상품과 동일한 패턴)
+- `ProductListUiState`에 `isLoading` 추가, `ProductListViewModel`은 생성 시 로딩 상태로 시작해 `fetchProducts` 콜백에서 로딩을 끝낸다. `ProductListScreen`은 로딩 중엔 그리드 대신 `CircularProgressIndicator`만 보여준다(Figma에 없는 상태라 사용자에게 확인 후 최소 형태로 결정)
+- **네트워크 보안 설정 추가**(예상 밖 이슈): 안드로이드는 targetSdk 28 이상에서 평문 HTTP 를 기본 차단한다. `app/src/debug/AndroidManifest.xml` + `app/src/debug/res/xml/network_security_config.xml`로 **디버그 빌드에서만** `10.0.2.2` 로의 cleartext 통신을 허용 — 릴리스 빌드는 영향받지 않는다
+- 테스트
+  - JVM: `ProductRepositoryTest`를 fetch/캐시 흐름 기준으로 재작성, `ProductResponseTest`(DTO→도메인 변환) 신규. `app/src/test/.../common/fixture/FakeProductApi.kt`에 `retrofit2.Call`을 직접 구현한 가짜(`FakeProductApi`는 `enqueue` 즉시 콜백 실행, `ManualProductApi`는 `completeWith()` 호출 전까지 대기)를 만들어 MockWebServer 없이 저장소·뷰모델을 동기적으로 검증(MockWebServer 도입은 6단계 범위)
+  - `ProductListViewModelTest`/`ProductDetailViewModelTest`/`CartFlowTest`: 기본 `ProductRepository()`(실네트워크) 대신 미리 채워진 `fakeProductRepository()`를 명시적으로 주입하도록 전면 수정, `ProductListViewModelTest`에 로딩 상태 전환 테스트 1건 추가
+  - androidTest: `MainActivityTest`의 첫 상품명을 더 이상 앱에서 계산할 수 없어(생성 규칙이 서버로 이동) 서버 값과 동일한 문자열로 하드코딩하고, 상품 목록이 뜰 때까지 `waitUntil`로 대기하는 `@Before` 추가 — **이 계측 테스트는 이제 로컬 서버가 떠 있어야 통과한다**(`server` 디렉터리에서 `./gradlew run`). `ShoppingBasketApplicationTest`는 장바구니 공유 테스트가 더 이상 `ProductRepository()`에 의존하지 않도록 상품을 직접 생성하게 바꾸고, `productRepository` 단일 인스턴스 테스트 추가. `ProductListScreenTest`에 로딩 인디케이터 노출/그리드 숨김 테스트 2건 추가
+- 확인 완료
+  1. **빌드 성공** — `assembleDebug`, `testDebugUnitTest`(신규/수정 테스트 포함 전체 통과) 모두 BUILD SUCCESSFUL
+  2. **실제 실행** — `server`에서 `./gradlew run`으로 서버를 띄운 상태로 에뮬레이터에 설치해 실행: 상품 목록이 서버 응답(p1 `PET보틀-밀크티병(300ml)` 12,000원 등)으로 정상 렌더링됨을 스크린샷으로 확인, 상품 클릭 시 상세 화면에 같은 상품이 즉시 표시됨(별도 네트워크 호출 없이 캐시 재사용) 확인. `connectedDebugAndroidTest` 61개 전체 통과. 확인 후 서버 프로세스 종료
+  3. **문서 검증** — 이 섹션이 검증 기록. 5단계 표에 적힌 범위(Retrofit 전환, `baseUrl` 연결, 상세 캐시 재사용)를 모두 충족
+- 다음 6단계(`test/productlist-mockwebserver`)에서 MockWebServer 로 HTTP·직렬화 계층까지 검증한다. 이번 브랜치의 `FakeProductApi`류 수동 페이크는 저장소 로직(페이징/캐시/콜백)만 검증하고 실제 JSON 파싱 경로는 타지 않는다는 한계가 있다
+
 **작업 방식(변하지 않는 원칙)**
 - 한 번에 한 단계만 진행하고 사용자 검토를 받는다
 - 단계가 끝나면 커밋 메시지 초안을 제안한다 (Claude는 직접 commit/push 하지 않음)
@@ -243,3 +369,30 @@ fun increase(key: String) / decrease(key: String)
 - 한 브랜치에는 한 기능만 담는다. 계층(ViewModel/View)이 아니라 기능 단위로 자른다
 - 빌드/테스트는 `.\gradlew testDebugUnitTest connectedDebugAndroidTest` 로 확인한다
   (`.\gradlew test --tests` 는 Android 에서 동작하지 않는다)
+
+### 4단계 브랜치 계획 (2026-09-02)
+
+3단계와 같은 순서 원칙(도메인 → 공용 뷰 → 화면별 → 인프라)으로 7개 브랜치를 잡는다.
+앞 3개는 새 의존성이 필요 없어 바로 착수 가능하고, 뒤 4개는 결정 사항 269~274번에 적힌
+새 의존성(Room / Retrofit / kotlinx.serialization / MockWebServer / Ktor)이 필요해 **착수 전 승인 필요**.
+
+| # | 브랜치 | 내용 | 새 의존성 |
+|---|---|---|---|
+| 1 | `feature/recentlyviewed-model` | `RecentlyViewedProducts` 일급 컬렉션(최대 10개, 진입 즉시 추가·기존 항목 재방문 시 중복 없이 맨 앞으로 이동) + `RecentlyViewedRepository`(인메모리, `CartRepository` 와 같은 변경 리스너 패턴), `ShoppingBasketApplication` 에 보관 | 없음 |
+| 2 | `feature/productlist-recentlyviewed-ui` | 상품 목록 상단 "최근 본 상품" 섹션. pen 4단계 프레임 확인 후 착수(레이아웃 미확인) | 없음 |
+| 3 | `feature/productdetail-recentlyviewed` | 상품 상세에 "마지막으로 본 상품" 1개(자기 자신 제외) 노출, 진입 즉시 기록, 그 카드로 진입한 상세는 `navigate(...) { popUpTo(ROUTE_PRODUCT_LIST) }` 로 뒤로가기 시 항상 목록으로 이동(결정 8번) | 없음 |
+| 4 | `chore/server-ktor-setup` | 저장소 최상위 `server/` 폴더에 별도 Ktor 프로젝트 생성, `GET /products` 가 현재 목업 50개와 동일한 데이터를 반환 | Ktor (서버 전용, 별도 Gradle 설정) |
+| 5 | `feature/productlist-http-client` | `libs.versions.toml` 에 Retrofit + `converter-kotlinx-serialization` 추가, `ProductRepository` 를 `Call<T>.enqueue(callback)` 방식으로 `GET /products` 호출하게 전환(상세는 캐시된 `Product` 재사용, 결정 5번), `baseUrl = http://10.0.2.2:PORT/` | Retrofit, kotlinx-serialization-json |
+| 6 | `test/productlist-mockwebserver` | `androidx-junit`/`test` 양쪽에 MockWebServer 로 `GET /products` 응답을 흉내 낸 테스트 추가 | okhttp3 mockwebserver |
+| 7 | `feature/persistence-room` | Room 추가(runtime/ktx/compiler-KSP), 최근 본 상품·장바구니를 저장/복원하는 얇은 뒷단(`Executor` fire-and-forget 쓰기 + 앱 시작 시 1회 읽기, 결정 10번). 기존 `CartRepository`/`RecentlyViewedRepository` 는 그대로 둔다 | Room |
+
+- 4·5·6·7번은 각 브랜치 착수 직전에 그때그때 새 의존성 추가를 사용자에게 확인받는다(2026-09-02 확정).
+- 2·3번은 착수 직전 Pencil 4단계 프레임(레이아웃·간격·색)을 확인하고 세부 값을 이 문서에 채운 뒤 코드를 쓴다.
+
+**1번(`feature/recentlyviewed-model`) 완료 (2026-09-02)**
+
+- `recentlyviewed/model/RecentlyViewedProducts`(일급 컬렉션, 최대 10개·재방문 시 중복 없이 맨 앞 이동·`latestExcluding`),
+  `RecentlyViewedRepository`(인메모리 + 변경 리스너, `CartRepository` 와 동일 구조)
+- `ShoppingBasketApplication` 에 `recentlyViewedRepository` 추가
+- 단위 테스트(JUnit5+AssertJ) 10개 신설 + 전체 unit 테스트 통과, 계측 테스트 52개(기존 51 + 신설 1) 전부 통과(`Medium_Phone(AVD) - 16`)
+- 아직 어느 화면에서도 `recordViewed`/`latestExcluding` 을 호출하지 않는다(2·3번에서 연결 예정) — 지금은 죽은 코드처럼 보이지만 의도된 것

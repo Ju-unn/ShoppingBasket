@@ -22,6 +22,7 @@ import com.example.shoppingbasket.basket.view.BasketScreen
 import com.example.shoppingbasket.basket.viewmodel.BasketViewModel
 import com.example.shoppingbasket.productdetail.view.ProductDetailScreen
 import com.example.shoppingbasket.productdetail.viewmodel.ProductDetailViewModel
+import com.example.shoppingbasket.productlist.model.ProductRepository
 import com.example.shoppingbasket.productlist.view.ProductListScreen
 import com.example.shoppingbasket.productlist.viewmodel.ProductListViewModel
 import com.example.shoppingbasket.recentlyviewed.model.RecentlyViewedRepository
@@ -66,7 +67,9 @@ private fun ShoppingNavHost(navController: NavHostController = rememberNavContro
 @Composable
 private fun ProductListRoute(navController: NavHostController) {
     val viewModel: ProductListViewModel = viewModel(
-        factory = viewModelFactory { initializer { ProductListViewModel(cartRepository(), recentlyViewedRepository()) } }
+        factory = viewModelFactory {
+            initializer { ProductListViewModel(cartRepository(), recentlyViewedRepository(), productRepository()) }
+        }
     )
     val uiState by viewModel.uiState
     ProductListScreen(
@@ -84,7 +87,7 @@ private fun ProductListRoute(navController: NavHostController) {
 private fun ProductDetailRoute(productId: String, navController: NavHostController) {
     val viewModel: ProductDetailViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { ProductDetailViewModel(productId, cartRepository(), recentlyViewedRepository()) }
+            initializer { ProductDetailViewModel(productId, cartRepository(), recentlyViewedRepository(), productRepository()) }
         }
     )
     val uiState by viewModel.uiState
@@ -128,4 +131,11 @@ private fun CreationExtras.cartRepository(): CartRepository {
 private fun CreationExtras.recentlyViewedRepository(): RecentlyViewedRepository {
     val application = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
     return (application as ShoppingBasketApplication).recentlyViewedRepository
+}
+
+// ViewModel 팩토리 안에서 Application 이 들고 있는 공용 상품 저장소를 꺼낸다.
+// 목록 화면이 받아온 캐시를 상세 화면이 그대로 재사용하려면 같은 인스턴스를 써야 한다 (4단계 결정 5번)
+private fun CreationExtras.productRepository(): ProductRepository {
+    val application = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
+    return (application as ShoppingBasketApplication).productRepository
 }
