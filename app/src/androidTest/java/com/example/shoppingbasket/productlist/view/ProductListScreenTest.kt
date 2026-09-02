@@ -97,6 +97,34 @@ class ProductListScreenTest {
         assert(addedKey == "p1")
     }
 
+    @Test
+    fun hidesRecentlyViewedSectionWhenEmpty() {
+        setScreen(ProductListUiState(recentlyViewed = emptyList()))
+
+        composeTestRule.onNodeWithText("최근 본 상품").assertDoesNotExist()
+    }
+
+    @Test
+    fun displaysRecentlyViewedSectionWhenNotEmpty() {
+        setScreen(ProductListUiState(recentlyViewed = listOf(testRecentlyViewedProduct())))
+
+        composeTestRule.onNodeWithText("최근 본 상품").assertIsDisplayed()
+        composeTestRule.onNodeWithText("PET보틀-정사각(500ml)").assertIsDisplayed()
+    }
+
+    @Test
+    fun clickingRecentlyViewedItemInvokesCallbackWithKey() {
+        var clickedKey: String? = null
+        setScreen(
+            uiState = ProductListUiState(recentlyViewed = listOf(testRecentlyViewedProduct())),
+            onProductClick = { key -> clickedKey = key }
+        )
+
+        composeTestRule.onNodeWithText("PET보틀-정사각(500ml)").performClick()
+
+        assert(clickedKey == "p1")
+    }
+
     private fun setScreen(
         uiState: ProductListUiState,
         onProductClick: (String) -> Unit = {},
@@ -119,12 +147,15 @@ class ProductListScreenTest {
     }
 
     private fun testItem(cartQuantity: Quantity? = null): ProductListItem {
-        val product = Product(
+        return ProductListItem(testRecentlyViewedProduct(), cartQuantity)
+    }
+
+    private fun testRecentlyViewedProduct(): Product {
+        return Product(
             ProductId("p1"),
             ProductName("PET보틀-정사각(500ml)"),
             Money(10_000),
             ProductImageUrl("https://picsum.photos/seed/p1/600")
         )
-        return ProductListItem(product, cartQuantity)
     }
 }

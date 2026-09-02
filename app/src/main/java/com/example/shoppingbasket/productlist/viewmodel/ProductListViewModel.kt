@@ -7,9 +7,11 @@ import com.example.shoppingbasket.basket.model.CartRepository
 import com.example.shoppingbasket.common.model.Page
 import com.example.shoppingbasket.productlist.model.Product
 import com.example.shoppingbasket.productlist.model.ProductRepository
+import com.example.shoppingbasket.recentlyviewed.model.RecentlyViewedRepository
 
 class ProductListViewModel(
     private val cartRepository: CartRepository,
+    private val recentlyViewedRepository: RecentlyViewedRepository = RecentlyViewedRepository(),
     private val repository: ProductRepository = ProductRepository()
 ) : ViewModel() {
 
@@ -17,18 +19,21 @@ class ProductListViewModel(
     private var loadedPage: Page = repository.firstPage()
     private var loadedProducts: List<Product> = productsOf(loadedPage)
 
-    // 장바구니가 다른 화면(상세/장바구니)에서 바뀌어도 목록의 수량 표시를 갱신하기 위한 구독 (3단계 확정 사항)
-    private val cartChangeListener = { refreshCartState() }
+    // 장바구니/최근 본 상품이 다른 화면(상세)에서 바뀌어도 갱신하기 위한 구독 (3단계 확정 사항)
+    private val cartChangeListener = { refreshState() }
+    private val recentlyViewedChangeListener = { refreshState() }
 
     private val _uiState = mutableStateOf(stateFor(loadedProducts))
     val uiState: State<ProductListUiState> = _uiState
 
     init {
         cartRepository.addChangeListener(cartChangeListener)
+        recentlyViewedRepository.addChangeListener(recentlyViewedChangeListener)
     }
 
     override fun onCleared() {
         cartRepository.removeChangeListener(cartChangeListener)
+        recentlyViewedRepository.removeChangeListener(recentlyViewedChangeListener)
     }
 
     // 다음 페이지를 읽어 기존 목록 뒤에 이어 붙인다 (교체가 아니라 누적)
@@ -54,7 +59,7 @@ class ProductListViewModel(
         cartRepository.decrease(key)
     }
 
-    private fun refreshCartState() {
+    private fun refreshState() {
         _uiState.value = stateFor(loadedProducts)
     }
 
@@ -62,7 +67,8 @@ class ProductListViewModel(
         return ProductListUiState(
             products = products.map { product -> ProductListItem(product, cartRepository.quantityOf(product)) },
             canLoadMore = repository.hasPageAfter(loadedPage),
-            cartBadgeText = cartRepository.findAll().totalQuantityDisplayValue()
+            cartBadgeText = cartRepository.findAll().totalQuantityDisplayValue(),
+            recentlyViewed = recentlyViewedRepository.findAll().items()
         )
     }
 

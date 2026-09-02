@@ -1,7 +1,9 @@
 package com.example.shoppingbasket.productlist.viewmodel
 
 import com.example.shoppingbasket.basket.model.CartRepository
+import com.example.shoppingbasket.common.fixture.testProduct
 import com.example.shoppingbasket.productdetail.viewmodel.ProductDetailViewModel
+import com.example.shoppingbasket.recentlyviewed.model.RecentlyViewedRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -9,6 +11,7 @@ import org.junit.jupiter.api.Test
 class ProductListViewModelTest {
 
     private val cartRepository = CartRepository()
+    private val recentlyViewedRepository = RecentlyViewedRepository()
 
     @Test
     @DisplayName("생성 시 첫 페이지 20개만 상태로 반영한다")
@@ -149,5 +152,24 @@ class ProductListViewModelTest {
         val item = viewModel.uiState.value.products.first { candidate -> candidate.key() == key }
         assertThat(item.cartQuantityDisplayValue()).isEqualTo("2")
         assertThat(viewModel.uiState.value.cartBadgeText).isEqualTo("2")
+    }
+
+    @Test
+    @DisplayName("생성 시에는 최근 본 상품이 없다")
+    fun startsWithNoRecentlyViewed() {
+        val viewModel = ProductListViewModel(cartRepository, recentlyViewedRepository)
+
+        assertThat(viewModel.uiState.value.recentlyViewed).isEmpty()
+    }
+
+    @Test
+    @DisplayName("상세 화면에서 상품을 보면 최근 본 상품 목록에 반영된다")
+    fun refreshesWhenRecentlyViewedChangesElsewhere() {
+        val viewModel = ProductListViewModel(cartRepository, recentlyViewedRepository)
+        val product = testProduct("p1")
+
+        recentlyViewedRepository.recordViewed(product)
+
+        assertThat(viewModel.uiState.value.recentlyViewed.map { viewed -> viewed.key() }).containsExactly("p1")
     }
 }

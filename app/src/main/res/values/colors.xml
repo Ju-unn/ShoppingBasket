@@ -12,5 +12,7 @@
     <color name="gray_5">#FF555555</color>
     <color name="gray_border">#FFAAAAAA</color>
     <color name="gray_skeleton">#FFEEEEEE</color>
+    <color name="gray_3">#FF333333</color>
+    <color name="gray_divider">#FFEBEBEB</color>
     <color name="overlay_black_5">#0D000000</color>
 </resources>

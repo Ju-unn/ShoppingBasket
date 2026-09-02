@@ -24,6 +24,7 @@ import com.example.shoppingbasket.productdetail.view.ProductDetailScreen
 import com.example.shoppingbasket.productdetail.viewmodel.ProductDetailViewModel
 import com.example.shoppingbasket.productlist.view.ProductListScreen
 import com.example.shoppingbasket.productlist.viewmodel.ProductListViewModel
+import com.example.shoppingbasket.recentlyviewed.model.RecentlyViewedRepository
 import com.example.shoppingbasket.ui.theme.ShoppingBasketTheme
 
 private const val ROUTE_PRODUCT_LIST = "productList"
@@ -65,7 +66,7 @@ private fun ShoppingNavHost(navController: NavHostController = rememberNavContro
 @Composable
 private fun ProductListRoute(navController: NavHostController) {
     val viewModel: ProductListViewModel = viewModel(
-        factory = viewModelFactory { initializer { ProductListViewModel(cartRepository()) } }
+        factory = viewModelFactory { initializer { ProductListViewModel(cartRepository(), recentlyViewedRepository()) } }
     )
     val uiState by viewModel.uiState
     ProductListScreen(
@@ -117,4 +118,10 @@ private fun BasketRoute(navController: NavHostController) {
 private fun CreationExtras.cartRepository(): CartRepository {
     val application = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
     return (application as ShoppingBasketApplication).cartRepository
+}
+
+// ViewModel 팩토리 안에서 Application 이 들고 있는 공용 최근 본 상품 저장소를 꺼낸다
+private fun CreationExtras.recentlyViewedRepository(): RecentlyViewedRepository {
+    val application = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
+    return (application as ShoppingBasketApplication).recentlyViewedRepository
 }

@@ -23,4 +23,10 @@ class ProductListUiStateTest {
     fun defaultCartBadgeText() {
         assertThat(ProductListUiState().cartBadgeText).isEqualTo("0")
     }
+
+    @Test
+    @DisplayName("기본 상태는 최근 본 상품이 없다")
+    fun defaultRecentlyViewed() {
+        assertThat(ProductListUiState().recentlyViewed).isEmpty()
+    }
 }
