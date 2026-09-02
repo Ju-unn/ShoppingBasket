@@ -19,12 +19,12 @@ class MainActivityTest {
     private val firstProductName = ProductRepository().findAll().items().first().displayName()
 
     @Before
-    fun clearCart() {
-        // 장바구니 저장소는 Application 수명이라 같은 프로세스의 앞선 테스트 결과가 남는다
-        val cartRepository = ApplicationProvider
-            .getApplicationContext<ShoppingBasketApplication>()
-            .cartRepository
+    fun clearSharedRepositories() {
+        // 장바구니/최근 본 상품 저장소는 Application 수명이라 같은 프로세스의 앞선 테스트 결과가 남는다
+        val application = ApplicationProvider.getApplicationContext<ShoppingBasketApplication>()
+        val cartRepository = application.cartRepository
         cartRepository.findAll().items().forEach { item -> cartRepository.remove(item.key()) }
+        application.recentlyViewedRepository.clear()
     }
 
     @Test
