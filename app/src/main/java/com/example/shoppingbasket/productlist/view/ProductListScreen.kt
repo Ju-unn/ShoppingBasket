@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -30,6 +31,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -76,6 +79,11 @@ fun ProductListScreen(
                 CartIconWithBadge(badgeText = uiState.cartBadgeText, onClick = onCartClick)
             }
         )
+        // 서버 응답을 받아오는 중이면 목록 대신 로딩 인디케이터만 보여준다 (5단계 확정 사항)
+        if (uiState.isLoading) {
+            LoadingIndicator()
+            return@Column
+        }
         // 최근 본 상품이 없으면 섹션 자체를 그리지 않는다 (4단계 pen 스펙)
         if (uiState.recentlyViewed.isNotEmpty()) {
             RecentlyViewedSection(products = uiState.recentlyViewed, onProductClick = onProductClick)
@@ -88,6 +96,17 @@ fun ProductListScreen(
             onAddToCart = onAddToCart,
             onIncrease = onIncrease,
             onDecrease = onDecrease
+        )
+    }
+}
+
+@Composable
+private fun LoadingIndicator(modifier: Modifier = Modifier) {
+    val description = stringResource(R.string.loading_products_description)
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(
+            color = colorResource(R.color.primary),
+            modifier = Modifier.semantics { contentDescription = description }
         )
     }
 }
