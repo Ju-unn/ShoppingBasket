@@ -29,4 +29,10 @@ class ProductListUiStateTest {
     fun defaultRecentlyViewed() {
         assertThat(ProductListUiState().recentlyViewed).isEmpty()
     }
+
+    @Test
+    @DisplayName("기본 상태는 로딩 중이 아니다")
+    fun defaultIsNotLoading() {
+        assertThat(ProductListUiState().isLoading).isFalse()
+    }
 }

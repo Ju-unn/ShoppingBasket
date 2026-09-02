@@ -23,12 +23,13 @@ class ProductListViewModel(
     private val cartChangeListener = { refreshState() }
     private val recentlyViewedChangeListener = { refreshState() }
 
-    private val _uiState = mutableStateOf(stateFor(loadedProducts))
+    private val _uiState = mutableStateOf(stateFor(loadedProducts, isLoading = true))
     val uiState: State<ProductListUiState> = _uiState
 
     init {
         cartRepository.addChangeListener(cartChangeListener)
         recentlyViewedRepository.addChangeListener(recentlyViewedChangeListener)
+        repository.fetchProducts { onProductsFetched() }
     }
 
     override fun onCleared() {
@@ -59,16 +60,24 @@ class ProductListViewModel(
         cartRepository.decrease(key)
     }
 
+    // 서버 응답이 도착하면 목록을 다시 첫 페이지부터 채우고 로딩을 끝낸다
+    private fun onProductsFetched() {
+        loadedPage = repository.firstPage()
+        loadedProducts = productsOf(loadedPage)
+        _uiState.value = stateFor(loadedProducts)
+    }
+
     private fun refreshState() {
         _uiState.value = stateFor(loadedProducts)
     }
 
-    private fun stateFor(products: List<Product>): ProductListUiState {
+    private fun stateFor(products: List<Product>, isLoading: Boolean = false): ProductListUiState {
         return ProductListUiState(
             products = products.map { product -> ProductListItem(product, cartRepository.quantityOf(product)) },
             canLoadMore = repository.hasPageAfter(loadedPage),
             cartBadgeText = cartRepository.findAll().totalQuantityDisplayValue(),
-            recentlyViewed = recentlyViewedRepository.findAll().items()
+            recentlyViewed = recentlyViewedRepository.findAll().items(),
+            isLoading = isLoading
         )
     }
 
