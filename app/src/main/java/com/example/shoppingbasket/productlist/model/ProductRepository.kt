@@ -1,13 +1,22 @@
 package com.example.shoppingbasket.productlist.model
 
-import com.example.shoppingbasket.common.model.Money
 import com.example.shoppingbasket.common.model.Page
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
-// 아직 백엔드가 없어 목업 데이터를 반환한다. 실제 데이터 소스가 준비되면 이 클래스만 교체한다.
-// 페이지 크기를 밖으로 노출하지 않고 firstPage() 로 첫 페이지를 만들어 준다.
-class ProductRepository {
+// 상품 데이터의 출처가 로컬 목업에서 서버(GET /products)로 바뀌었다 (4단계 결정 4·5번).
+// 코루틴을 아직 쓰지 않으므로 Call<T>.enqueue(callback) 방식으로 비동기 호출하고, 결과를 캐시해 둔다.
+// 상세 화면은 이 캐시를 findById() 로 그대로 재사용하고 별도로 네트워크를 호출하지 않는다.
+class ProductRepository(private val productApi: ProductApi = ProductApi.create()) {
 
-    fun findAll(): ProductList = ProductList(MOCK_PRODUCTS)
+    private var cachedProducts: ProductList = ProductList(emptyList())
+
+    fun fetchProducts(onFinished: () -> Unit) {
+        productApi.fetchProducts().enqueue(fetchCallback(onFinished))
+    }
+
+    fun findAll(): ProductList = cachedProducts
 
     fun firstPage(): Page = Page.first(PAGE_SIZE)
 
@@ -17,31 +26,23 @@ class ProductRepository {
 
     fun findById(id: String): Product? = findAll().findByKey(id)
 
+    private fun fetchCallback(onFinished: () -> Unit): Callback<List<ProductResponse>> {
+        return object : Callback<List<ProductResponse>> {
+
+            override fun onResponse(call: Call<List<ProductResponse>>, response: Response<List<ProductResponse>>) {
+                response.body()?.let { products -> cachedProducts = ProductList(products.map { product -> product.toProduct() }) }
+                onFinished()
+            }
+
+            // 실패 시 캐시를 비워두지 않고 그대로 유지한 채 로딩만 끝낸다 (에러 UI 없음, 4단계 5번 브랜치 확정 사항)
+            override fun onFailure(call: Call<List<ProductResponse>>, throwable: Throwable) {
+                onFinished()
+            }
+        }
+    }
+
     private companion object {
         // 더보기 한 번에 불러올 상품 수 (2단계 기능 요구사항의 "20개 기준")
         const val PAGE_SIZE = 20
-        const val MOCK_PRODUCT_COUNT = 50
-
-        // 디자인(.pen)에 나오는 상품명·가격 조합으로 목업을 만든다.
-        val SHAPES = listOf("정사각", "밀크티병", "납작", "단지", "원형")
-        val VOLUMES = listOf("500ml", "300ml", "2000ml", "4000ml", "200ml", "260ml", "370ml")
-        val PRICES = listOf(10_000, 12_000)
-
-        val MOCK_PRODUCTS = (1..MOCK_PRODUCT_COUNT).map { number -> mockProduct(number) }
-
-        fun mockProduct(number: Int): Product = Product(
-            ProductId("p$number"),
-            mockName(number),
-            Money(pick(PRICES, number)),
-            ProductImageUrl("https://picsum.photos/seed/p$number/600")
-        )
-
-        fun mockName(number: Int): ProductName {
-            val shape = pick(SHAPES, number)
-            val volume = pick(VOLUMES, number)
-            return ProductName("PET보틀-$shape($volume)")
-        }
-
-        fun <T> pick(candidates: List<T>, number: Int): T = candidates[number % candidates.size]
     }
 }

@@ -125,6 +125,20 @@ class ProductListScreenTest {
         assert(clickedKey == "p1")
     }
 
+    @Test
+    fun showsLoadingIndicatorWhileLoading() {
+        setScreen(ProductListUiState(isLoading = true))
+
+        composeTestRule.onNodeWithContentDescription("상품 불러오는 중").assertExists()
+    }
+
+    @Test
+    fun hidesProductGridWhileLoading() {
+        setScreen(ProductListUiState(products = listOf(testItem()), isLoading = true))
+
+        composeTestRule.onNodeWithText("PET보틀-정사각(500ml)").assertDoesNotExist()
+    }
+
     private fun setScreen(
         uiState: ProductListUiState,
         onProductClick: (String) -> Unit = {},

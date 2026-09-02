@@ -1,8 +1,12 @@
 package com.example.shoppingbasket.productlist.viewmodel
 
 import com.example.shoppingbasket.basket.model.CartRepository
+import com.example.shoppingbasket.common.fixture.ManualProductApi
+import com.example.shoppingbasket.common.fixture.fakeProductRepository
+import com.example.shoppingbasket.common.fixture.fakeProductResponses
 import com.example.shoppingbasket.common.fixture.testProduct
 import com.example.shoppingbasket.productdetail.viewmodel.ProductDetailViewModel
+import com.example.shoppingbasket.productlist.model.ProductRepository
 import com.example.shoppingbasket.recentlyviewed.model.RecentlyViewedRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
@@ -12,11 +16,12 @@ class ProductListViewModelTest {
 
     private val cartRepository = CartRepository()
     private val recentlyViewedRepository = RecentlyViewedRepository()
+    private val productRepository = fakeProductRepository()
 
     @Test
     @DisplayName("생성 시 첫 페이지 20개만 상태로 반영한다")
     fun loadsFirstPageOnCreate() {
-        val viewModel = ProductListViewModel(cartRepository)
+        val viewModel = ProductListViewModel(cartRepository, repository = productRepository)
 
         assertThat(viewModel.uiState.value.products).hasSize(20)
     }
@@ -24,7 +29,7 @@ class ProductListViewModelTest {
     @Test
     @DisplayName("뒤에 상품이 남아 있으면 더보기가 가능하다")
     fun canLoadMoreOnFirstPage() {
-        val viewModel = ProductListViewModel(cartRepository)
+        val viewModel = ProductListViewModel(cartRepository, repository = productRepository)
 
         assertThat(viewModel.uiState.value.canLoadMore).isTrue()
     }
@@ -32,7 +37,7 @@ class ProductListViewModelTest {
     @Test
     @DisplayName("더보기를 누르면 다음 페이지가 기존 목록 뒤에 이어 붙는다")
     fun loadMoreAppendsNextPage() {
-        val viewModel = ProductListViewModel(cartRepository)
+        val viewModel = ProductListViewModel(cartRepository, repository = productRepository)
 
         viewModel.loadMore()
 
@@ -42,7 +47,7 @@ class ProductListViewModelTest {
     @Test
     @DisplayName("더보기로 쌓인 목록의 앞부분은 첫 페이지 그대로 유지된다")
     fun loadMoreKeepsAlreadyLoadedProducts() {
-        val viewModel = ProductListViewModel(cartRepository)
+        val viewModel = ProductListViewModel(cartRepository, repository = productRepository)
         val firstPage = viewModel.uiState.value.products
 
         viewModel.loadMore()
@@ -53,7 +58,7 @@ class ProductListViewModelTest {
     @Test
     @DisplayName("마지막 페이지까지 읽으면 더보기가 불가능해진다")
     fun cannotLoadMoreOnLastPage() {
-        val viewModel = ProductListViewModel(cartRepository)
+        val viewModel = ProductListViewModel(cartRepository, repository = productRepository)
 
         viewModel.loadMore()
         viewModel.loadMore()
@@ -65,7 +70,7 @@ class ProductListViewModelTest {
     @Test
     @DisplayName("마지막 페이지에서 더보기를 더 눌러도 목록이 늘어나지 않는다")
     fun loadMoreOnLastPageDoesNothing() {
-        val viewModel = ProductListViewModel(cartRepository)
+        val viewModel = ProductListViewModel(cartRepository, repository = productRepository)
 
         repeat(5) { viewModel.loadMore() }
 
@@ -75,7 +80,7 @@ class ProductListViewModelTest {
     @Test
     @DisplayName("더보기로 쌓인 목록에 같은 상품이 중복되지 않는다")
     fun loadMoreDoesNotDuplicateProducts() {
-        val viewModel = ProductListViewModel(cartRepository)
+        val viewModel = ProductListViewModel(cartRepository, repository = productRepository)
 
         viewModel.loadMore()
         viewModel.loadMore()
@@ -87,7 +92,7 @@ class ProductListViewModelTest {
     @Test
     @DisplayName("생성 시에는 아무 상품도 장바구니에 담겨 있지 않다")
     fun startsWithNothingInCart() {
-        val viewModel = ProductListViewModel(cartRepository)
+        val viewModel = ProductListViewModel(cartRepository, repository = productRepository)
 
         assertThat(viewModel.uiState.value.products).noneMatch { item -> item.isInCart() }
     }
@@ -95,7 +100,7 @@ class ProductListViewModelTest {
     @Test
     @DisplayName("담기를 누르면 해당 상품이 장바구니에 반영된다")
     fun addToCartReflectsQuantity() {
-        val viewModel = ProductListViewModel(cartRepository)
+        val viewModel = ProductListViewModel(cartRepository, repository = productRepository)
         val key = viewModel.uiState.value.products.first().key()
 
         viewModel.addToCart(key)
@@ -108,7 +113,7 @@ class ProductListViewModelTest {
     @Test
     @DisplayName("수량 증가를 누르면 표시 수량이 늘어난다")
     fun increaseReflectsQuantity() {
-        val viewModel = ProductListViewModel(cartRepository)
+        val viewModel = ProductListViewModel(cartRepository, repository = productRepository)
         val key = viewModel.uiState.value.products.first().key()
         viewModel.addToCart(key)
 
@@ -121,7 +126,7 @@ class ProductListViewModelTest {
     @Test
     @DisplayName("수량 1에서 감소를 누르면 다시 장바구니에 없는 상태가 된다")
     fun decreaseAtMinimumRemovesFromCart() {
-        val viewModel = ProductListViewModel(cartRepository)
+        val viewModel = ProductListViewModel(cartRepository, repository = productRepository)
         val key = viewModel.uiState.value.products.first().key()
         viewModel.addToCart(key)
 
@@ -134,7 +139,7 @@ class ProductListViewModelTest {
     @Test
     @DisplayName("장바구니가 비어 있으면 배지는 0이다")
     fun cartBadgeIsZeroWhenEmpty() {
-        val viewModel = ProductListViewModel(cartRepository)
+        val viewModel = ProductListViewModel(cartRepository, repository = productRepository)
 
         assertThat(viewModel.uiState.value.cartBadgeText).isEqualTo("0")
     }
@@ -142,10 +147,10 @@ class ProductListViewModelTest {
     @Test
     @DisplayName("다른 화면에서 장바구니가 바뀌면 배지와 수량 표시가 갱신된다")
     fun refreshesWhenCartChangesElsewhere() {
-        val viewModel = ProductListViewModel(cartRepository)
+        val viewModel = ProductListViewModel(cartRepository, repository = productRepository)
         val key = viewModel.uiState.value.products.first().key()
         // 상세 화면이 하는 것처럼 다른 ViewModel 을 통해 같은 저장소에 담는다
-        ProductDetailViewModel(key, cartRepository).addToCart()
+        ProductDetailViewModel(key, cartRepository, productRepository = productRepository).addToCart()
 
         cartRepository.increase(key)
 
@@ -157,7 +162,7 @@ class ProductListViewModelTest {
     @Test
     @DisplayName("생성 시에는 최근 본 상품이 없다")
     fun startsWithNoRecentlyViewed() {
-        val viewModel = ProductListViewModel(cartRepository, recentlyViewedRepository)
+        val viewModel = ProductListViewModel(cartRepository, recentlyViewedRepository, productRepository)
 
         assertThat(viewModel.uiState.value.recentlyViewed).isEmpty()
     }
@@ -165,11 +170,24 @@ class ProductListViewModelTest {
     @Test
     @DisplayName("상세 화면에서 상품을 보면 최근 본 상품 목록에 반영된다")
     fun refreshesWhenRecentlyViewedChangesElsewhere() {
-        val viewModel = ProductListViewModel(cartRepository, recentlyViewedRepository)
+        val viewModel = ProductListViewModel(cartRepository, recentlyViewedRepository, productRepository)
         val product = testProduct("p1")
 
         recentlyViewedRepository.recordViewed(product)
 
         assertThat(viewModel.uiState.value.recentlyViewed.map { viewed -> viewed.key() }).containsExactly("p1")
+    }
+
+    @Test
+    @DisplayName("생성 시 로딩 상태로 시작해 서버 응답을 받으면 로딩이 끝난다")
+    fun startsLoadingThenFinishesOnResponse() {
+        val manualApi = ManualProductApi()
+        val viewModel = ProductListViewModel(cartRepository, repository = ProductRepository(manualApi))
+        assertThat(viewModel.uiState.value.isLoading).isTrue()
+
+        manualApi.completeWith(fakeProductResponses())
+
+        assertThat(viewModel.uiState.value.isLoading).isFalse()
+        assertThat(viewModel.uiState.value.products).hasSize(20)
     }
 }
