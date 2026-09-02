@@ -51,4 +51,10 @@ class ProductDetailUiStateTest {
 
         assertThat(uiState.quantityDisplayValue()).isEqualTo("1")
     }
+
+    @Test
+    @DisplayName("기본 상태는 마지막으로 본 상품이 없다")
+    fun defaultLastViewedProduct() {
+        assertThat(ProductDetailUiState().lastViewedProduct).isNull()
+    }
 }

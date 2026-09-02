@@ -49,4 +49,14 @@ class RecentlyViewedRepositoryTest {
 
         assertThat(notifiedCount).isEqualTo(0)
     }
+
+    @Test
+    @DisplayName("초기화하면 기록된 상품이 모두 사라진다")
+    fun clear() {
+        repository.recordViewed(testProduct("p1"))
+
+        repository.clear()
+
+        assertThat(repository.findAll().items()).isEmpty()
+    }
 }

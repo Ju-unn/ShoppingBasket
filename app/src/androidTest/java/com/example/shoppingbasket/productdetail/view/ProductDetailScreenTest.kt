@@ -74,12 +74,41 @@ class ProductDetailScreenTest {
         assert(decreaseCalled)
     }
 
+    @Test
+    fun hidesLastViewedCardWhenAbsent() {
+        setScreen(ProductDetailUiState(product = testProduct(), lastViewedProduct = null))
+
+        composeTestRule.onNodeWithText("마지막으로 본 상품").assertDoesNotExist()
+    }
+
+    @Test
+    fun displaysLastViewedCardWhenPresent() {
+        setScreen(ProductDetailUiState(product = testProduct(), lastViewedProduct = testLastViewedProduct()))
+
+        composeTestRule.onNodeWithText("마지막으로 본 상품").assertExists()
+        composeTestRule.onNodeWithText("장바구니-보조가방").assertExists()
+    }
+
+    @Test
+    fun clickingLastViewedCardInvokesCallbackWithKey() {
+        var clickedKey: String? = null
+        setScreen(
+            uiState = ProductDetailUiState(product = testProduct(), lastViewedProduct = testLastViewedProduct()),
+            onLastViewedClick = { key -> clickedKey = key }
+        )
+
+        composeTestRule.onNodeWithText("장바구니-보조가방").performClick()
+
+        assert(clickedKey == "p2")
+    }
+
     private fun setScreen(
         uiState: ProductDetailUiState,
         onClose: () -> Unit = {},
         onAddToCart: () -> Unit = {},
         onIncrease: () -> Unit = {},
-        onDecrease: () -> Unit = {}
+        onDecrease: () -> Unit = {},
+        onLastViewedClick: (String) -> Unit = {}
     ) {
         composeTestRule.setContent {
             ProductDetailScreen(
@@ -87,7 +116,8 @@ class ProductDetailScreenTest {
                 onClose = onClose,
                 onAddToCart = onAddToCart,
                 onIncrease = onIncrease,
-                onDecrease = onDecrease
+                onDecrease = onDecrease,
+                onLastViewedClick = onLastViewedClick
             )
         }
     }
@@ -98,6 +128,15 @@ class ProductDetailScreenTest {
             ProductName("PET보틀-정사각(500ml)"),
             Money(10_000),
             ProductImageUrl("https://picsum.photos/seed/p1/600")
+        )
+    }
+
+    private fun testLastViewedProduct(): Product {
+        return Product(
+            ProductId("p2"),
+            ProductName("장바구니-보조가방"),
+            Money(5_000),
+            ProductImageUrl("https://picsum.photos/seed/p2/600")
         )
     }
 }

@@ -84,7 +84,7 @@ private fun ProductListRoute(navController: NavHostController) {
 private fun ProductDetailRoute(productId: String, navController: NavHostController) {
     val viewModel: ProductDetailViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { ProductDetailViewModel(productId, cartRepository()) }
+            initializer { ProductDetailViewModel(productId, cartRepository(), recentlyViewedRepository()) }
         }
     )
     val uiState by viewModel.uiState
@@ -93,7 +93,11 @@ private fun ProductDetailRoute(productId: String, navController: NavHostControll
         onClose = { navController.popBackStack() },
         onAddToCart = { viewModel.addToCart() },
         onIncrease = { viewModel.increase() },
-        onDecrease = { viewModel.decrease() }
+        onDecrease = { viewModel.decrease() },
+        // "마지막으로 본 상품" 카드로 들어간 상세는 뒤로가기 한 번에 항상 상품 목록으로 가야 한다 (4단계 결정 8번)
+        onLastViewedClick = { lastViewedProductId ->
+            navController.navigate("productDetail/$lastViewedProductId") { popUpTo(ROUTE_PRODUCT_LIST) }
+        }
     )
 }
 

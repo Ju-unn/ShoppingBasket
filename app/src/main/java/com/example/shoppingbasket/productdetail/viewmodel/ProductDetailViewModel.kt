@@ -4,15 +4,18 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.shoppingbasket.basket.model.CartRepository
+import com.example.shoppingbasket.productlist.model.Product
 import com.example.shoppingbasket.productlist.model.ProductRepository
+import com.example.shoppingbasket.recentlyviewed.model.RecentlyViewedRepository
 
 class ProductDetailViewModel(
     productKey: String,
     private val cartRepository: CartRepository,
+    private val recentlyViewedRepository: RecentlyViewedRepository = RecentlyViewedRepository(),
     productRepository: ProductRepository = ProductRepository()
 ) : ViewModel() {
 
-    private val _uiState = mutableStateOf(ProductDetailUiState(product = productRepository.findById(productKey)))
+    private val _uiState = mutableStateOf(loadedState(productRepository.findById(productKey)))
     val uiState: State<ProductDetailUiState> = _uiState
 
     fun increase() {
@@ -27,5 +30,14 @@ class ProductDetailViewModel(
         val state = _uiState.value
         val product = state.product ?: return
         cartRepository.add(product, state.quantity)
+    }
+
+    // 진입 즉시 최근 본 상품으로 기록하고, 자기 자신을 제외한 마지막 상품을 함께 담는다 (4단계 결정 8번)
+    private fun loadedState(product: Product?): ProductDetailUiState {
+        if (product == null) {
+            return ProductDetailUiState()
+        }
+        recentlyViewedRepository.recordViewed(product)
+        return ProductDetailUiState(product = product, lastViewedProduct = recentlyViewedRepository.latestExcluding(product))
     }
 }

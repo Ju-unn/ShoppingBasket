@@ -18,6 +18,12 @@ class RecentlyViewedRepository {
 
     fun latestExcluding(product: Product): Product? = recentlyViewed.latestExcluding(product)
 
+    // 계측 테스트마다 Application 수명 저장소를 초기화하기 위한 용도 (CartRepository 의 remove 와 같은 목적)
+    fun clear() {
+        recentlyViewed = RecentlyViewedProducts(emptyList())
+        notifyChanged()
+    }
+
     fun addChangeListener(listener: () -> Unit) {
         changeListeners.add(listener)
     }

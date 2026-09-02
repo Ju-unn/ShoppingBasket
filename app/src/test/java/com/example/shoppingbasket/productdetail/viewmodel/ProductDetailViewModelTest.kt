@@ -1,6 +1,7 @@
 package com.example.shoppingbasket.productdetail.viewmodel
 
 import com.example.shoppingbasket.basket.model.CartRepository
+import com.example.shoppingbasket.recentlyviewed.model.RecentlyViewedRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -9,6 +10,7 @@ class ProductDetailViewModelTest {
 
     // 테스트마다 새 저장소를 만들어 쓰므로 앞선 테스트의 장바구니가 남지 않는다
     private val cartRepository = CartRepository()
+    private val recentlyViewedRepository = RecentlyViewedRepository()
 
     @Test
     @DisplayName("존재하는 상품 key로 생성하면 해당 상품을 상태로 반영한다")
@@ -76,5 +78,31 @@ class ProductDetailViewModelTest {
         viewModel.increase()
 
         assertThat(cartRepository.findAll().items()).isEmpty()
+    }
+
+    @Test
+    @DisplayName("진입 즉시 최근 본 상품으로 기록된다")
+    fun recordsProductAsRecentlyViewedOnCreate() {
+        ProductDetailViewModel("p1", cartRepository, recentlyViewedRepository)
+
+        assertThat(recentlyViewedRepository.findAll().items().map { product -> product.key() }).containsExactly("p1")
+    }
+
+    @Test
+    @DisplayName("마지막으로 본 상품이 없으면(첫 방문) 상태에도 없다")
+    fun startsWithoutLastViewedProduct() {
+        val viewModel = ProductDetailViewModel("p1", cartRepository, recentlyViewedRepository)
+
+        assertThat(viewModel.uiState.value.lastViewedProduct).isNull()
+    }
+
+    @Test
+    @DisplayName("이전에 다른 상품을 봤다면 자기 자신을 제외한 마지막 상품이 상태에 담긴다")
+    fun exposesLastViewedProductExcludingSelf() {
+        ProductDetailViewModel("p2", cartRepository, recentlyViewedRepository)
+
+        val viewModel = ProductDetailViewModel("p1", cartRepository, recentlyViewedRepository)
+
+        assertThat(viewModel.uiState.value.lastViewedProduct?.key()).isEqualTo("p2")
     }
 }
