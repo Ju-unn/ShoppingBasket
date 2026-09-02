@@ -23,4 +23,10 @@ class ShoppingBasketApplicationTest {
 
         application.cartRepository.remove(product.key())
     }
+
+    @Test
+    fun sharesSingleRecentlyViewedRepository() {
+        // 화면마다 저장소를 새로 만들면 최근 본 상품이 화면 간에 공유되지 않는다
+        assert(application.recentlyViewedRepository === application.recentlyViewedRepository)
+    }
 }
