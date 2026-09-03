@@ -17,9 +17,10 @@ interface ProductApi {
         private const val BASE_URL = "http://10.0.2.2:8080/"
         private val JSON = Json { ignoreUnknownKeys = true }
 
-        fun create(): ProductApi {
+        // baseUrl 기본값은 실제 서버 주소. 테스트에서는 MockWebServer 주소를 넘겨 실제 HTTP·JSON 파싱 경로를 검증한다.
+        fun create(baseUrl: String = BASE_URL): ProductApi {
             val converterFactory = JSON.asConverterFactory("application/json".toMediaType())
-            val retrofit = Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(converterFactory).build()
+            val retrofit = Retrofit.Builder().baseUrl(baseUrl).addConverterFactory(converterFactory).build()
             return retrofit.create(ProductApi::class.java)
         }
     }
