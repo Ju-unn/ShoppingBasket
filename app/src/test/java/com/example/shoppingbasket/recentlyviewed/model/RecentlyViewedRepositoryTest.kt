@@ -59,4 +59,23 @@ class RecentlyViewedRepositoryTest {
 
         assertThat(repository.findAll().items()).isEmpty()
     }
+
+    @Test
+    @DisplayName("복원한 상태로 조회 결과를 채운다")
+    fun restore() {
+        repository.restore(RecentlyViewedProducts(listOf(testProduct("p1"))))
+
+        assertThat(repository.findAll().items().map { product -> product.key() }).containsExactly("p1")
+    }
+
+    @Test
+    @DisplayName("복원은 변경 리스너에 알리지 않는다")
+    fun restoreDoesNotNotifyListeners() {
+        var notifiedCount = 0
+        repository.addChangeListener { notifiedCount += 1 }
+
+        repository.restore(RecentlyViewedProducts(listOf(testProduct("p1"))))
+
+        assertThat(notifiedCount).isEqualTo(0)
+    }
 }

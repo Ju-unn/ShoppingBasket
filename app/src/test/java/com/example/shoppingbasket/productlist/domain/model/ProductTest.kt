@@ -36,4 +36,17 @@ class ProductTest {
 
         assertThat(product.priceFor(Quantity(3))).isEqualTo(Money(30_000))
     }
+
+    @Test
+    @DisplayName("단가를 그대로 반환한다")
+    fun unitPrice() {
+        val product = Product(
+            ProductId("p1"),
+            ProductName("PET보틀-정사각(500ml)"),
+            Money(10_000),
+            ProductImageUrl("https://picsum.photos/seed/p1/600")
+        )
+
+        assertThat(product.unitPrice()).isEqualTo(Money(10_000))
+    }
 }

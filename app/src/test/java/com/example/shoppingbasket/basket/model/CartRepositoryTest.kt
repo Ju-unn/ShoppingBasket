@@ -144,6 +144,28 @@ class CartRepositoryTest {
         assertThat(notifiedCount).isEqualTo(0)
     }
 
+    @Test
+    @DisplayName("복원한 상태로 조회 결과를 채운다")
+    fun restore() {
+        val restored = CartItems(listOf(CartItem(testProduct("p1", 10_000), Quantity(2))))
+
+        repository.restore(restored)
+
+        assertThat(repository.findAll().items()).hasSize(1)
+        assertThat(repository.findAll().items().first().displayQuantity()).isEqualTo("2")
+    }
+
+    @Test
+    @DisplayName("복원은 변경 리스너에 알리지 않는다")
+    fun restoreDoesNotNotifyListeners() {
+        var notifiedCount = 0
+        repository.addChangeListener { notifiedCount += 1 }
+
+        repository.restore(CartItems(listOf(CartItem(testProduct("p1", 10_000), Quantity(1)))))
+
+        assertThat(notifiedCount).isEqualTo(0)
+    }
+
     private fun addProducts(count: Int) {
         (1..count).forEach { number -> repository.add(testProduct("p$number")) }
     }

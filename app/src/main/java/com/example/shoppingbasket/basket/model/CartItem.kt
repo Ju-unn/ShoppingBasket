@@ -29,5 +29,8 @@ data class CartItem(
 
     fun currentQuantity(): Quantity = quantity
 
+    // Room 저장을 위해 상품 단가를 그대로 노출 (4단계 결정 10번, 영속화 전용)
+    fun unitPrice(): Money = product.unitPrice()
+
     fun accumulate(total: Money): Money = total.plus(product.priceFor(quantity))
 }

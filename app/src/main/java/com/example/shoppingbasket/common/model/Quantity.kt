@@ -9,6 +9,9 @@ value class Quantity(private val value: Int) {
 
     fun toDisplayValue(): String = value.toString()
 
+    // Room 저장을 위한 원시값 노출 (4단계 결정 10번, 영속화 전용)
+    fun toRawValue(): Int = value
+
     fun increasedBy(amount: Quantity): Quantity = Quantity(value + amount.value)
 
     fun decreased(): Quantity {

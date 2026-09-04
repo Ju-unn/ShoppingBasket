@@ -150,13 +150,21 @@ CLAUDE.md 를 고치지 말고 여기에 기록한다.**
 
 ## 다음 단계
 
-### 지금 상태 (2026-09-01 기준) ⚠️ 이어받을 때 먼저 확인할 것
+### 지금 상태 (2026-09-03 기준) ⚠️ 이어받을 때 먼저 확인할 것
 
 | 브랜치 | 상태 |
 |---|---|
-| `master` | `6f2a93d` (PR #14 까지 전부 머지됨). 열려 있는 작업 브랜치 없음, 워킹 트리 클린 |
+| `master` | PR #21(`test/productlist-mockwebserver`)까지 전부 머지됨 |
+| `feature/persistence-room` | 작업 완료, 사용자 리뷰 대기 중(커밋/푸시 전) — 7번(마지막) 브랜치 |
 
-3단계(수량 조절)는 완료됐다. 다음 차례는 4단계(최근 본 상품 + HTTP Client) — 아래 "4단계 준비" 참고.
+4단계(최근 본 상품 + HTTP Client + Room 영속화, 브랜치 1~7)가 전부 완료됐다. 미션 원문 요구사항은 "미션 원문 요구사항 vs 이 프로젝트 상태" 표 기준으로 전부 ✅. 다음 작업은 사용자 지시에 따라 새로 정한다(5단계 계획 없음, 아래는 3단계 시점의 옛 기록).
+
+### 현재 막힌 부분 (2026-09-03, 내일 이어서 작업)
+
+- 로컬 서버(`server/` 디렉터리)를 실행하려는데 `..\gradlew run` 이 `ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.` 로 실패
+- 원인: 터미널 세션에 `JAVA_HOME` 환경변수가 안 잡혀 있음. Android Studio 내장 JDK 경로(`C:\Program Files\Android\Android Studio\jbr`)는 확인해둠
+- 임시 해결책(세션 한정, 아직 실행까지 검증 안 함): PowerShell 이면 `$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"`, cmd 면 `set JAVA_HOME=C:\Program Files\Android\Android Studio\jbr` 를 `..\gradlew run` 전에 실행
+- 내일 할 일: 위 임시 해결책으로 서버가 실제로 뜨는지 확인 → 되면 `JAVA_HOME` 을 시스템 환경변수에 영구 등록할지 여부 결정(사용자 확인 필요, 시스템 설정 변경이라 임의로 안 함) → 서버 뜬 상태에서 앱 실행해 상품 목록/이미지가 정상 로드되는지 확인
 
 ### 3단계 브랜치 계획 — 완료 (기록용)
 
@@ -228,12 +236,12 @@ Compose 로 구현한다.** 아래는 미션 원문 요구사항을 이 프로�
 
 | 요구사항 | 상태 |
 |---|---|
-| 최근 본 상품 목록 상단 섹션 (최대 10개) | ❌ 미착수 |
-| 상품 상세에 마지막으로 본 상품 1개 노출 (자기 자신 제외) | ❌ 미착수 |
-| 마지막으로 본 상품 화면에서 뒤로가기 → 상품 목록 | ❌ 미착수 |
-| 앱 재시작해도 최근 본 상품·장바구니 유지 (Room) | ❌ 미착수 — Room 의존성 자체가 없음 |
-| 상품 목록 HTTP Client 구현 (OkHttp) | ❌ 미착수 — `ProductRepository` 가 인메모리 목업 50개 |
-| MockWebServer 로 테스트 환경 구성 | ❌ 미착수 |
+| 최근 본 상품 목록 상단 섹션 (최대 10개) | ✅ 완료 (브랜치 1·2) |
+| 상품 상세에 마지막으로 본 상품 1개 노출 (자기 자신 제외) | ✅ 완료 (브랜치 3) |
+| 마지막으로 본 상품 화면에서 뒤로가기 → 상품 목록 | ✅ 완료 (브랜치 3) |
+| 앱 재시작해도 최근 본 상품·장바구니 유지 (Room) | ✅ 완료 (브랜치 7) |
+| 상품 목록 HTTP Client 구현 (OkHttp) | ✅ 완료 (브랜치 4·5) |
+| MockWebServer 로 테스트 환경 구성 | ✅ 완료 (브랜치 6) |
 | (힌트) Activity Result API | 해당 없음 — 단일 Activity + Compose Navigation 이라 애초에 안 씀 (3단계와 동일 이유) |
 | (힌트) Intent Flag 로 뒤로가기 제어 | **Compose Navigation 등가물로 대체.** `navigate(popUpTo=...)` 로 백스택 정리 (아래 결정 사항 8번) |
 
@@ -396,3 +404,26 @@ Compose 로 구현한다.** 아래는 미션 원문 요구사항을 이 프로�
 - `ShoppingBasketApplication` 에 `recentlyViewedRepository` 추가
 - 단위 테스트(JUnit5+AssertJ) 10개 신설 + 전체 unit 테스트 통과, 계측 테스트 52개(기존 51 + 신설 1) 전부 통과(`Medium_Phone(AVD) - 16`)
 - 아직 어느 화면에서도 `recordViewed`/`latestExcluding` 을 호출하지 않는다(2·3번에서 연결 예정) — 지금은 죽은 코드처럼 보이지만 의도된 것
+
+**6번(`test/productlist-mockwebserver`) 완료 (2026-09-03)**
+
+- `okhttp3:mockwebserver` 추가(`libs.versions.toml`, `testImplementation`). `ProductApi.create()` 가 `baseUrl` 을 인자로 받도록 변경(기본값은 기존 운영 주소)해 테스트에서 MockWebServer 주소를 주입
+- `ProductApiTest` 신설(`app/src/test`): 실제 Retrofit/OkHttp/kotlinx.serialization 경로로 JSON 파싱, `GET /products` 요청 경로, 서버 오류(500) 응답 처리를 검증
+- 문서 계획엔 "androidx-junit/test 양쪽에" 라고 적혀 있었지만, `ProductApi`/`ProductRepositoryImpl` 은 Data 계층이라 CLAUDE.md 8.2 표 기준(Data 계층 → `app/src/test`)에 따라 **`test` 쪽에만** 추가했다. 기존 `FakeProductApi` 는 그대로 두고(저장소 로직 검증), 이번 테스트는 그게 못 타던 실제 HTTP·JSON 경로만 메꿈
+- 확인 완료: `assembleDebug`/`testDebugUnitTest`(신규 3개 포함 전체 통과), `compileDebugAndroidTestKotlin` BUILD SUCCESSFUL(영향 없음)
+
+**7번(`feature/persistence-room`) 완료 (2026-09-03)**
+
+- Room 추가(`room-runtime` + `room-compiler`(KSP), `com.google.devtools.ksp` 플러그인 신설). `room-ktx` 는 코루틴 미사용(결정 1번)이라 제외
+- 값 객체에 영속화 전용 원시값 접근자 최소 추가: `Money.toRawValue()`, `Quantity.toRawValue()`, `Product.unitPrice()`(단가 `Money` 그대로 반환), `CartItem.unitPrice()`(위임). 기존 `CartItem.currentQuantity()` 와 같은 성격의 "표현용 메서드" 예외로 취급(OC9)
+- `basket/data/local/`: `CartItemEntity`, `CartItemDao`(`findAll`/`replaceAll`/`clear`/`insertAll`, 전부 동기), `CartPersistence`(저장은 `Executor` 로 fire-and-forget, 복원은 호출 스레드에서 동기)
+- `recentlyviewed/data/local/`: 위와 동일 구조의 `RecentlyViewedProductEntity`/`RecentlyViewedProductDao`/`RecentlyViewedPersistence`
+- `common/data/local/ShoppingBasketDatabase`: 두 Dao 를 묶는 Room DB. `create()` 에서 `allowMainThreadQueries()` 사용 — 앱 시작 시 1회 동기 읽기만 메인 스레드에서 허용(결정 10번). ponytail 주석으로 데이터가 커지면 백그라운드로 옮기라고 표시해둠
+- `CartRepository`/`RecentlyViewedRepository` 에 `restore()` 추가(변경 리스너에 알리지 않음 — 초기값 채우기이지 "변경"이 아님)
+- `ShoppingBasketApplication.onCreate()` 에서 DB 생성 → 두 저장소 복원 → 이후 변경 리스너로 fire-and-forget 저장을 연결. `CartRepository`/`RecentlyViewedRepository` 자체 코드는 건드리지 않음(결정 10번 그대로)
+- 테스트: JVM(`app/src/test`) 은 `FakeCartItemDao`/`FakeRecentlyViewedProductDao`(인메모리 가짜, `common/fixture`)로 `CartPersistence`/`RecentlyViewedPersistence` 의 저장·복원·순서·덮어쓰기 로직 검증(동기 실행되도록 `Executor` 를 테스트에서 즉시 실행형으로 주입). androidTest 는 `Room.inMemoryDatabaseBuilder` 로 실제 SQLite 위에서 `CartItemDao`/`RecentlyViewedProductDao` 의 정렬·전체 교체 동작을 검증(FakeProductApi/MockWebServer 와 같은 분리 패턴, 6번 참고)
+- 확인 완료
+  1. **빌드 성공** — `assembleDebug`, `testDebugUnitTest`(신규 포함 전체 통과), `compileDebugAndroidTestKotlin` 모두 BUILD SUCCESSFUL
+  2. **실제 실행** — `connectedDebugAndroidTest` 67개 전체 통과(신규 6개 포함). 추가로 실기기 흑백 상자 검증: 앱 실행 → 상품 상세 진입(최근 본 상품 기록) → 장바구니 담기 → `am force-stop` 으로 프로세스 강제 종료 → 기기의 `shopping_basket.db` 를 직접 pull 해 `cart_items`/`recently_viewed_products` 행이 정확한 값으로 저장된 것을 확인 → 앱 재실행 후 UI 덤프로 장바구니 배지 "1", "최근 본 상품" 섹션, 상품 타일의 수량 스테퍼가 전부 복원된 것을 확인. logcat 에 FATAL EXCEPTION 없음
+  3. **문서 검증** — 이 섹션이 검증 기록. 7번 표에 적힌 범위(Room 추가, fire-and-forget 저장, 앱 시작 시 1회 복원, 기존 저장소 코드 불변)를 모두 충족
+- 이것으로 4단계 미션 원문 요구사항("앱 재시작해도 최근 본 상품·장바구니 유지")이 모두 구현됨. 4단계 브랜치 계획 7개 전부 완료

@@ -51,4 +51,10 @@ class QuantityTest {
         assertThat(Quantity(1).isMinimum()).isTrue()
         assertThat(Quantity(2).isMinimum()).isFalse()
     }
+
+    @Test
+    @DisplayName("원시값을 그대로 반환한다")
+    fun toRawValue() {
+        assertThat(Quantity(3).toRawValue()).isEqualTo(3)
+    }
 }
