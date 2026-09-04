@@ -27,4 +27,10 @@ class MoneyTest {
     fun plus() {
         assertThat(Money(1_000).plus(Money(2_000))).isEqualTo(Money(3_000))
     }
+
+    @Test
+    @DisplayName("원시값을 그대로 반환한다")
+    fun toRawValue() {
+        assertThat(Money(10_000).toRawValue()).isEqualTo(10_000)
+    }
 }

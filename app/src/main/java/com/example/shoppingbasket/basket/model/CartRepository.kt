@@ -12,6 +12,11 @@ class CartRepository {
     private var cartItems = CartItems(emptyList())
     private val changeListeners = mutableListOf<() -> Unit>()
 
+    // Room 에서 복원한 상태를 초기 값으로 채운다 (4단계 결정 10번). 이미 채워진 상태를 다시 저장할 필요는 없어 알리지 않는다
+    fun restore(items: CartItems) {
+        cartItems = items
+    }
+
     fun add(product: Product, quantity: Quantity = Quantity.ONE) {
         cartItems = cartItems.added(product, quantity)
         notifyChanged()

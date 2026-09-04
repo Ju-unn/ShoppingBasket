@@ -9,6 +9,11 @@ class RecentlyViewedRepository {
     private var recentlyViewed = RecentlyViewedProducts(emptyList())
     private val changeListeners = mutableListOf<() -> Unit>()
 
+    // Room 에서 복원한 상태를 초기 값으로 채운다 (4단계 결정 10번). 이미 채워진 상태를 다시 저장할 필요는 없어 알리지 않는다
+    fun restore(products: RecentlyViewedProducts) {
+        recentlyViewed = products
+    }
+
     fun recordViewed(product: Product) {
         recentlyViewed = recentlyViewed.viewed(product)
         notifyChanged()

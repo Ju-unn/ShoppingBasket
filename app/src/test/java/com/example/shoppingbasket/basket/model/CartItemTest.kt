@@ -69,4 +69,12 @@ class CartItemTest {
 
         assertThat(cartItem.currentQuantity()).isEqualTo(Quantity(2))
     }
+
+    @Test
+    @DisplayName("상품 단가를 반환한다")
+    fun unitPrice() {
+        val cartItem = CartItem(testProduct("p1", 10_000), Quantity(2))
+
+        assertThat(cartItem.unitPrice()).isEqualTo(Money(10_000))
+    }
 }
