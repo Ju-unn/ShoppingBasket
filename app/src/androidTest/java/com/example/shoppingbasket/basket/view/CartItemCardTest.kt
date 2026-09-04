@@ -11,6 +11,7 @@ import com.example.shoppingbasket.productlist.domain.model.Product
 import com.example.shoppingbasket.productlist.domain.model.ProductId
 import com.example.shoppingbasket.productlist.domain.model.ProductImageUrl
 import com.example.shoppingbasket.productlist.domain.model.ProductName
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
 import org.junit.Test
 
@@ -45,7 +46,7 @@ class CartItemCardTest {
 
         composeTestRule.onNodeWithContentDescription("수량 증가").performClick()
 
-        assert(increaseClicked)
+        assertThat(increaseClicked).isTrue()
     }
 
     @Test
@@ -62,7 +63,7 @@ class CartItemCardTest {
 
         composeTestRule.onNodeWithContentDescription("수량 감소").performClick()
 
-        assert(decreaseClicked)
+        assertThat(decreaseClicked).isTrue()
     }
 
     private fun testCartItem(quantity: Quantity): CartItem {

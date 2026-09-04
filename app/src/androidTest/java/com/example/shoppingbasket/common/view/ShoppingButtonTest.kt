@@ -3,6 +3,7 @@ package com.example.shoppingbasket.common.view
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
 import org.junit.Test
 
@@ -29,6 +30,6 @@ class ShoppingButtonTest {
         }
         composeTestRule.onNodeWithText("더보기").performClick()
 
-        assert(clicked)
+        assertThat(clicked).isTrue()
     }
 }

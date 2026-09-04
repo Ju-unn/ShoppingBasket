@@ -13,6 +13,7 @@ import com.example.shoppingbasket.productlist.domain.model.Product
 import com.example.shoppingbasket.productlist.domain.model.ProductId
 import com.example.shoppingbasket.productlist.domain.model.ProductImageUrl
 import com.example.shoppingbasket.productlist.domain.model.ProductName
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
 import org.junit.Test
 
@@ -39,7 +40,7 @@ class BasketScreenTest {
 
         composeTestRule.onNodeWithContentDescription("삭제").performClick()
 
-        assert(removedKey == "p1")
+        assertThat(removedKey).isEqualTo("p1")
     }
 
     @Test
@@ -52,7 +53,7 @@ class BasketScreenTest {
 
         composeTestRule.onNodeWithContentDescription("수량 증가").performClick()
 
-        assert(increasedKey == "p1")
+        assertThat(increasedKey).isEqualTo("p1")
     }
 
     @Test
@@ -65,7 +66,7 @@ class BasketScreenTest {
 
         composeTestRule.onNodeWithContentDescription("수량 감소").performClick()
 
-        assert(decreasedKey == "p1")
+        assertThat(decreasedKey).isEqualTo("p1")
     }
 
     @Test
@@ -111,7 +112,7 @@ class BasketScreenTest {
 
         composeTestRule.onNodeWithText(">").performClick()
 
-        assert(nextCalled)
+        assertThat(nextCalled).isTrue()
     }
 
     @Test
@@ -124,7 +125,7 @@ class BasketScreenTest {
 
         composeTestRule.onNodeWithText("<").performClick()
 
-        assert(previousCalled)
+        assertThat(previousCalled).isTrue()
     }
 
     private fun setScreen(

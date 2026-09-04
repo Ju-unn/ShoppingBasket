@@ -3,6 +3,7 @@ package com.example.shoppingbasket.basket.view
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
 import org.junit.Test
 
@@ -25,7 +26,7 @@ class CartPagingControlTest {
 
         composeTestRule.onNodeWithText(">").performClick()
 
-        assert(nextCalled)
+        assertThat(nextCalled).isTrue()
     }
 
     @Test
@@ -35,7 +36,7 @@ class CartPagingControlTest {
 
         composeTestRule.onNodeWithText("<").performClick()
 
-        assert(previousCalled)
+        assertThat(previousCalled).isTrue()
     }
 
     @Test
@@ -45,7 +46,7 @@ class CartPagingControlTest {
 
         composeTestRule.onNodeWithText(">").performClick()
 
-        assert(!nextCalled)
+        assertThat(nextCalled).isFalse()
     }
 
     @Test
@@ -55,7 +56,7 @@ class CartPagingControlTest {
 
         composeTestRule.onNodeWithText("<").performClick()
 
-        assert(!previousCalled)
+        assertThat(previousCalled).isFalse()
     }
 
     private fun setControl(

@@ -4,6 +4,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
 import org.junit.Test
 
@@ -26,7 +27,7 @@ class StepperTest {
 
         composeTestRule.onNodeWithContentDescription("수량 증가").performClick()
 
-        assert(increaseCalled)
+        assertThat(increaseCalled).isTrue()
     }
 
     @Test
@@ -36,7 +37,7 @@ class StepperTest {
 
         composeTestRule.onNodeWithContentDescription("수량 감소").performClick()
 
-        assert(decreaseCalled)
+        assertThat(decreaseCalled).isTrue()
     }
 
     private fun setStepper(

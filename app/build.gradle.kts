@@ -65,6 +65,7 @@ dependencies {
     testImplementation(libs.kotlin.test)
     testImplementation(libs.okhttp.mockwebserver)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.assertj.core)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
 import org.junit.Test
 
@@ -30,7 +31,7 @@ class ClickableModifierTest {
         }
         composeTestRule.onNodeWithTag("target").performClick()
 
-        assert(clicked)
+        assertThat(clicked).isTrue()
     }
 
     @Test
@@ -47,6 +48,6 @@ class ClickableModifierTest {
         }
         composeTestRule.onNodeWithTag("target").performClick()
 
-        assert(!clicked)
+        assertThat(clicked).isFalse()
     }
 }
