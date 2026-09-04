@@ -11,6 +11,7 @@ import com.example.shoppingbasket.productlist.domain.model.Product
 import com.example.shoppingbasket.productlist.domain.model.ProductId
 import com.example.shoppingbasket.productlist.domain.model.ProductImageUrl
 import com.example.shoppingbasket.productlist.domain.model.ProductName
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
 import org.junit.Test
 
@@ -45,7 +46,7 @@ class ProductDetailScreenTest {
 
         composeTestRule.onNodeWithText("장바구니 담기").performClick()
 
-        assert(addToCartClicked)
+        assertThat(addToCartClicked).isTrue()
     }
 
     @Test
@@ -58,7 +59,7 @@ class ProductDetailScreenTest {
 
         composeTestRule.onNodeWithContentDescription("수량 증가").performClick()
 
-        assert(increaseCalled)
+        assertThat(increaseCalled).isTrue()
     }
 
     @Test
@@ -71,7 +72,7 @@ class ProductDetailScreenTest {
 
         composeTestRule.onNodeWithContentDescription("수량 감소").performClick()
 
-        assert(decreaseCalled)
+        assertThat(decreaseCalled).isTrue()
     }
 
     @Test
@@ -99,7 +100,7 @@ class ProductDetailScreenTest {
 
         composeTestRule.onNodeWithText("장바구니-보조가방").performClick()
 
-        assert(clickedKey == "p2")
+        assertThat(clickedKey).isEqualTo("p2")
     }
 
     private fun setScreen(

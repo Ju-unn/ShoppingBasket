@@ -4,6 +4,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.shoppingbasket.common.data.local.ShoppingBasketDatabase
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -32,7 +33,7 @@ class CartItemDaoTest {
 
     @Test
     fun findAllReturnsEmptyListInitially() {
-        assert(dao.findAll().isEmpty())
+        assertThat(dao.findAll()).isEmpty()
     }
 
     @Test
@@ -46,7 +47,7 @@ class CartItemDaoTest {
 
         val rows = dao.findAll()
 
-        assert(rows.map { entity -> entity.productId } == listOf("p1", "p2"))
+        assertThat(rows.map { entity -> entity.productId }).containsExactly("p1", "p2")
     }
 
     @Test
@@ -55,6 +56,6 @@ class CartItemDaoTest {
 
         dao.replaceAll(listOf(CartItemEntity("p2", "상품-p2", 20_000, "https://example.com/p2", 1, 0)))
 
-        assert(dao.findAll().map { entity -> entity.productId } == listOf("p2"))
+        assertThat(dao.findAll().map { entity -> entity.productId }).containsExactly("p2")
     }
 }

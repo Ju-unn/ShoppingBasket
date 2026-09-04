@@ -11,6 +11,7 @@ import com.example.shoppingbasket.productlist.domain.model.ProductId
 import com.example.shoppingbasket.productlist.domain.model.ProductImageUrl
 import com.example.shoppingbasket.productlist.domain.model.ProductName
 import com.example.shoppingbasket.productlist.viewmodel.ProductListItem
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
 import org.junit.Test
 
@@ -41,7 +42,7 @@ class ProductGridItemTest {
 
         composeTestRule.onNodeWithContentDescription("장바구니에 담기").performClick()
 
-        assert(addCalled)
+        assertThat(addCalled).isTrue()
     }
 
     @Test
@@ -58,7 +59,7 @@ class ProductGridItemTest {
 
         composeTestRule.onNodeWithContentDescription("수량 증가").performClick()
 
-        assert(increaseCalled)
+        assertThat(increaseCalled).isTrue()
     }
 
     @Test
@@ -68,7 +69,7 @@ class ProductGridItemTest {
 
         composeTestRule.onNodeWithContentDescription("수량 감소").performClick()
 
-        assert(decreaseCalled)
+        assertThat(decreaseCalled).isTrue()
     }
 
     private fun setItem(
