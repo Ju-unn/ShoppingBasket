@@ -103,6 +103,37 @@ class ProductDetailScreenTest {
         assertThat(clickedKey).isEqualTo("p2")
     }
 
+    @Test
+    fun showsNotFoundMessageWhenProductIsMissing() {
+        setScreen(ProductDetailUiState(product = null))
+
+        composeTestRule.onNodeWithText("상품을 찾을 수 없습니다").assertExists()
+    }
+
+    @Test
+    fun keepsCloseIconWhenProductIsMissing() {
+        setScreen(ProductDetailUiState(product = null))
+
+        composeTestRule.onNodeWithContentDescription("닫기").assertExists()
+    }
+
+    @Test
+    fun clickingCloseWhenProductIsMissingInvokesCallback() {
+        var closeClicked = false
+        setScreen(uiState = ProductDetailUiState(product = null), onClose = { closeClicked = true })
+
+        composeTestRule.onNodeWithContentDescription("닫기").performClick()
+
+        assertThat(closeClicked).isTrue()
+    }
+
+    @Test
+    fun hidesAddToCartButtonWhenProductIsMissing() {
+        setScreen(ProductDetailUiState(product = null))
+
+        composeTestRule.onNodeWithText("장바구니 담기").assertDoesNotExist()
+    }
+
     private fun setScreen(
         uiState: ProductDetailUiState,
         onClose: () -> Unit = {},

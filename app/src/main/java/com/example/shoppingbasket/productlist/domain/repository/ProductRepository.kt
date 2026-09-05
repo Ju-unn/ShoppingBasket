@@ -7,7 +7,8 @@ import com.example.shoppingbasket.productlist.domain.model.ProductList
 // 상품 데이터 접근을 추상화하는 도메인 인터페이스. 구현체는 data.repository.ProductRepositoryImpl.
 interface ProductRepository {
 
-    fun fetchProducts(onFinished: () -> Unit)
+    // 호출한 쪽이 응답 도착과 실패를 구분할 수 있게 성공·실패 콜백을 따로 받는다
+    fun fetchProducts(onLoaded: () -> Unit, onFailed: () -> Unit)
 
     fun findAll(): ProductList
 

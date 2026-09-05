@@ -18,8 +18,8 @@ class ProductRepositoryImpl(private val productApi: ProductApi = ProductApi.crea
 
     private var cachedProducts: ProductList = ProductList(emptyList())
 
-    override fun fetchProducts(onFinished: () -> Unit) {
-        productApi.fetchProducts().enqueue(fetchCallback(onFinished))
+    override fun fetchProducts(onLoaded: () -> Unit, onFailed: () -> Unit) {
+        productApi.fetchProducts().enqueue(fetchCallback(onLoaded, onFailed))
     }
 
     override fun findAll(): ProductList = cachedProducts
@@ -32,19 +32,28 @@ class ProductRepositoryImpl(private val productApi: ProductApi = ProductApi.crea
 
     override fun findById(id: String): Product? = findAll().findByKey(id)
 
-    private fun fetchCallback(onFinished: () -> Unit): Callback<List<ProductResponse>> {
+    private fun fetchCallback(onLoaded: () -> Unit, onFailed: () -> Unit): Callback<List<ProductResponse>> {
         return object : Callback<List<ProductResponse>> {
 
+            // HTTP 500 처럼 성공이 아닌 응답에는 본문이 없다. 연결 자체가 끊긴 것과 똑같이 실패로 다룬다 (5단계 확정 사항)
             override fun onResponse(call: Call<List<ProductResponse>>, response: Response<List<ProductResponse>>) {
-                response.body()?.let { products -> cachedProducts = ProductList(products.map { product -> product.toProduct() }) }
-                onFinished()
+                val products = loadedProducts(response) ?: return onFailed()
+                cachedProducts = ProductList(products.map { product -> product.toProduct() })
+                onLoaded()
             }
 
-            // 실패 시 캐시를 비워두지 않고 그대로 유지한 채 로딩만 끝낸다 (에러 UI 없음, 4단계 5번 브랜치 확정 사항)
+            // 캐시는 비우지 않고 그대로 둔 채 실패만 알린다. 화면이 안내와 재시도 버튼을 보여준다
             override fun onFailure(call: Call<List<ProductResponse>>, throwable: Throwable) {
-                onFinished()
+                onFailed()
             }
         }
+    }
+
+    private fun loadedProducts(response: Response<List<ProductResponse>>): List<ProductResponse>? {
+        if (!response.isSuccessful) {
+            return null
+        }
+        return response.body()
     }
 
     private companion object {

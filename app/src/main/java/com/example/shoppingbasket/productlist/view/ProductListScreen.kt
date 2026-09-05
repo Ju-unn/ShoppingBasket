@@ -56,6 +56,8 @@ private val CART_BADGE_SIZE = 20.dp
 private val CART_BADGE_TEXT_SIZE = 14.sp
 private val CART_BADGE_OFFSET_X = 6.dp
 private val CART_BADGE_OFFSET_Y = (-6).dp
+private val LOAD_FAILED_TEXT_SIZE = 16.sp
+private val LOAD_FAILED_SPACING = 16.dp
 
 @Composable
 fun ProductListScreen(
@@ -66,6 +68,7 @@ fun ProductListScreen(
     onAddToCart: (String) -> Unit,
     onIncrease: (String) -> Unit,
     onDecrease: (String) -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -82,6 +85,11 @@ fun ProductListScreen(
         // 서버 응답을 받아오는 중이면 목록 대신 로딩 인디케이터만 보여준다 (5단계 확정 사항)
         if (uiState.isLoading) {
             LoadingIndicator()
+            return@Column
+        }
+        // 목록을 받아오지 못했으면 빈 격자 대신 원인과 재시도 수단을 보여준다 (5단계 확정 사항)
+        if (uiState.hasLoadFailed) {
+            LoadFailedMessage(onRetry = onRetry)
             return@Column
         }
         // 최근 본 상품이 없으면 섹션 자체를 그리지 않는다 (4단계 pen 스펙)
@@ -109,6 +117,30 @@ private fun LoadingIndicator(modifier: Modifier = Modifier) {
             modifier = Modifier.semantics { contentDescription = description }
         )
     }
+}
+
+@Composable
+private fun LoadFailedMessage(onRetry: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        LoadFailedText()
+        Spacer(modifier = Modifier.height(LOAD_FAILED_SPACING))
+        ShoppingButton(text = stringResource(R.string.retry_button), onClick = onRetry)
+    }
+}
+
+@Composable
+private fun LoadFailedText() {
+    Text(
+        text = stringResource(R.string.product_load_failed_message),
+        fontSize = LOAD_FAILED_TEXT_SIZE,
+        color = colorResource(R.color.gray_3)
+    )
 }
 
 @Composable

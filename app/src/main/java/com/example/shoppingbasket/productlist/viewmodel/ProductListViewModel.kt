@@ -30,12 +30,18 @@ class ProductListViewModel(
     init {
         cartRepository.addChangeListener(cartChangeListener)
         recentlyViewedRepository.addChangeListener(recentlyViewedChangeListener)
-        repository.fetchProducts { onProductsFetched() }
+        fetchProducts()
     }
 
     override fun onCleared() {
         cartRepository.removeChangeListener(cartChangeListener)
         recentlyViewedRepository.removeChangeListener(recentlyViewedChangeListener)
+    }
+
+    // 실패 안내의 "다시 시도" 를 누르면 다시 로딩 상태로 돌아가 같은 요청을 한 번 더 보낸다
+    fun retry() {
+        _uiState.value = stateFor(loadedProducts, isLoading = true)
+        fetchProducts()
     }
 
     // 다음 페이지를 읽어 기존 목록 뒤에 이어 붙인다 (교체가 아니라 누적)
@@ -61,6 +67,10 @@ class ProductListViewModel(
         cartRepository.decrease(key)
     }
 
+    private fun fetchProducts() {
+        repository.fetchProducts(onLoaded = { onProductsFetched() }, onFailed = { onProductsFetchFailed() })
+    }
+
     // 서버 응답이 도착하면 목록을 다시 첫 페이지부터 채우고 로딩을 끝낸다
     private fun onProductsFetched() {
         loadedPage = repository.firstPage()
@@ -68,17 +78,27 @@ class ProductListViewModel(
         _uiState.value = stateFor(loadedProducts)
     }
 
+    // 실패하면 로딩을 끝내되 빈 목록을 정상인 것처럼 보여주지 않고 실패 상태로 표시한다
+    private fun onProductsFetchFailed() {
+        _uiState.value = stateFor(loadedProducts, hasLoadFailed = true)
+    }
+
     private fun refreshState() {
         _uiState.value = stateFor(loadedProducts)
     }
 
-    private fun stateFor(products: List<Product>, isLoading: Boolean = false): ProductListUiState {
+    private fun stateFor(
+        products: List<Product>,
+        isLoading: Boolean = false,
+        hasLoadFailed: Boolean = false
+    ): ProductListUiState {
         return ProductListUiState(
             products = products.map { product -> ProductListItem(product, cartRepository.quantityOf(product)) },
             canLoadMore = repository.hasPageAfter(loadedPage),
             cartBadgeText = cartRepository.findAll().totalQuantityDisplayValue(),
             recentlyViewed = recentlyViewedRepository.findAll().items(),
-            isLoading = isLoading
+            isLoading = isLoading,
+            hasLoadFailed = hasLoadFailed
         )
     }
 

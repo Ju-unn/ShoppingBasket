@@ -190,4 +190,79 @@ class ProductListViewModelTest {
         assertThat(viewModel.uiState.value.isLoading).isFalse()
         assertThat(viewModel.uiState.value.products).hasSize(20)
     }
+
+    @Test
+    @DisplayName("서버에 연결하지 못하면 로딩이 끝나고 실패 상태가 된다")
+    fun marksLoadFailedWhenRequestFails() {
+        val manualApi = ManualProductApi()
+        val viewModel = ProductListViewModel(cartRepository, repository = ProductRepositoryImpl(manualApi))
+
+        manualApi.failWith()
+
+        assertThat(viewModel.uiState.value.isLoading).isFalse()
+        assertThat(viewModel.uiState.value.hasLoadFailed).isTrue()
+    }
+
+    @Test
+    @DisplayName("HTTP 500 응답도 실패 상태로 표시한다")
+    fun marksLoadFailedOnServerError() {
+        val manualApi = ManualProductApi()
+        val viewModel = ProductListViewModel(cartRepository, repository = ProductRepositoryImpl(manualApi))
+
+        manualApi.completeWithServerError()
+
+        assertThat(viewModel.uiState.value.hasLoadFailed).isTrue()
+    }
+
+    @Test
+    @DisplayName("응답을 정상으로 받으면 실패 상태가 아니다")
+    fun doesNotMarkLoadFailedOnSuccess() {
+        val manualApi = ManualProductApi()
+        val viewModel = ProductListViewModel(cartRepository, repository = ProductRepositoryImpl(manualApi))
+
+        manualApi.completeWith(fakeProductResponses())
+
+        assertThat(viewModel.uiState.value.hasLoadFailed).isFalse()
+    }
+
+    @Test
+    @DisplayName("다시 시도를 누르면 실패 표시를 지우고 로딩 상태로 돌아간다")
+    fun retryReturnsToLoadingState() {
+        val manualApi = ManualProductApi()
+        val viewModel = ProductListViewModel(cartRepository, repository = ProductRepositoryImpl(manualApi))
+        manualApi.failWith()
+
+        viewModel.retry()
+
+        assertThat(viewModel.uiState.value.isLoading).isTrue()
+        assertThat(viewModel.uiState.value.hasLoadFailed).isFalse()
+    }
+
+    @Test
+    @DisplayName("다시 시도 후 응답이 오면 상품 목록이 채워진다")
+    fun retryLoadsProductsOnSecondAttempt() {
+        val manualApi = ManualProductApi()
+        val viewModel = ProductListViewModel(cartRepository, repository = ProductRepositoryImpl(manualApi))
+        manualApi.failWith()
+
+        viewModel.retry()
+        manualApi.completeWith(fakeProductResponses())
+
+        assertThat(viewModel.uiState.value.isLoading).isFalse()
+        assertThat(viewModel.uiState.value.hasLoadFailed).isFalse()
+        assertThat(viewModel.uiState.value.products).hasSize(20)
+    }
+
+    @Test
+    @DisplayName("다시 시도해도 또 실패하면 실패 상태로 되돌아온다")
+    fun retryKeepsFailedStateWhenRequestFailsAgain() {
+        val manualApi = ManualProductApi()
+        val viewModel = ProductListViewModel(cartRepository, repository = ProductRepositoryImpl(manualApi))
+        manualApi.failWith()
+
+        viewModel.retry()
+        manualApi.failWith()
+
+        assertThat(viewModel.uiState.value.hasLoadFailed).isTrue()
+    }
 }

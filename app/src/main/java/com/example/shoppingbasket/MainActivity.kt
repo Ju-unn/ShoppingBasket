@@ -79,7 +79,8 @@ private fun ProductListRoute(navController: NavHostController) {
         onLoadMore = { viewModel.loadMore() },
         onAddToCart = { key -> viewModel.addToCart(key) },
         onIncrease = { key -> viewModel.increase(key) },
-        onDecrease = { key -> viewModel.decrease(key) }
+        onDecrease = { key -> viewModel.decrease(key) },
+        onRetry = { viewModel.retry() }
     )
 }
 
