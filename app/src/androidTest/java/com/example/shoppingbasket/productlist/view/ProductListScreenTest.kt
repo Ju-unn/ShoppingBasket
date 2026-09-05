@@ -140,13 +140,54 @@ class ProductListScreenTest {
         composeTestRule.onNodeWithText("PET보틀-정사각(500ml)").assertDoesNotExist()
     }
 
+    @Test
+    fun showsFailureMessageAndRetryButtonWhenLoadFailed() {
+        setScreen(ProductListUiState(hasLoadFailed = true))
+
+        composeTestRule.onNodeWithText("상품을 불러오지 못했습니다").assertIsDisplayed()
+        composeTestRule.onNodeWithText("다시 시도").assertIsDisplayed()
+    }
+
+    @Test
+    fun keepsTopBarWhenLoadFailed() {
+        setScreen(ProductListUiState(hasLoadFailed = true))
+
+        composeTestRule.onNodeWithText("Shopping").assertExists()
+        composeTestRule.onNodeWithContentDescription("장바구니").assertExists()
+    }
+
+    @Test
+    fun hidesProductGridWhenLoadFailed() {
+        setScreen(ProductListUiState(products = listOf(testItem()), hasLoadFailed = true))
+
+        composeTestRule.onNodeWithText("PET보틀-정사각(500ml)").assertDoesNotExist()
+    }
+
+    @Test
+    fun clickingRetryInvokesCallback() {
+        var retryCalled = false
+        setScreen(uiState = ProductListUiState(hasLoadFailed = true), onRetry = { retryCalled = true })
+
+        composeTestRule.onNodeWithText("다시 시도").performClick()
+
+        assertThat(retryCalled).isTrue()
+    }
+
+    @Test
+    fun hidesFailureMessageWhileLoading() {
+        setScreen(ProductListUiState(isLoading = true, hasLoadFailed = true))
+
+        composeTestRule.onNodeWithText("다시 시도").assertDoesNotExist()
+    }
+
     private fun setScreen(
         uiState: ProductListUiState,
         onProductClick: (String) -> Unit = {},
         onLoadMore: () -> Unit = {},
         onAddToCart: (String) -> Unit = {},
         onIncrease: (String) -> Unit = {},
-        onDecrease: (String) -> Unit = {}
+        onDecrease: (String) -> Unit = {},
+        onRetry: () -> Unit = {}
     ) {
         composeTestRule.setContent {
             ProductListScreen(
@@ -156,7 +197,8 @@ class ProductListScreenTest {
                 onLoadMore = onLoadMore,
                 onAddToCart = onAddToCart,
                 onIncrease = onIncrease,
-                onDecrease = onDecrease
+                onDecrease = onDecrease,
+                onRetry = onRetry
             )
         }
     }

@@ -35,4 +35,10 @@ class ProductListUiStateTest {
     fun defaultIsNotLoading() {
         assertThat(ProductListUiState().isLoading).isFalse()
     }
+
+    @Test
+    @DisplayName("기본 상태는 불러오기 실패가 아니다")
+    fun defaultHasNotLoadFailed() {
+        assertThat(ProductListUiState().hasLoadFailed).isFalse()
+    }
 }

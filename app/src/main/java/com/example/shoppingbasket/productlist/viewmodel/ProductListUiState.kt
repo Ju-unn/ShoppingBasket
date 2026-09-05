@@ -11,5 +11,7 @@ data class ProductListUiState(
     // 최근 본 상품 섹션. 비어 있으면 화면에서 섹션 자체를 그리지 않는다
     val recentlyViewed: List<Product> = emptyList(),
     // 서버에서 상품 목록을 받아오는 중인지 여부. true 면 화면에는 로딩 인디케이터만 보여준다
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    // 상품 목록을 받아오지 못했는지 여부. true 면 화면에는 안내 문구와 다시 시도 버튼만 보여준다 (5단계 확정 사항)
+    val hasLoadFailed: Boolean = false
 )

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -42,6 +43,8 @@ import com.example.shoppingbasket.productlist.domain.model.ProductImageUrl
 import com.example.shoppingbasket.productlist.domain.model.ProductName
 import com.example.shoppingbasket.ui.theme.ShoppingBasketTheme
 
+private val PRODUCT_NOT_FOUND_TEXT_SIZE = 16.sp
+
 @Composable
 fun ProductDetailScreen(
     uiState: ProductDetailUiState,
@@ -52,31 +55,81 @@ fun ProductDetailScreen(
     onLastViewedClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val product = uiState.product ?: return
     Column(modifier = modifier.fillMaxSize().background(colorResource(R.color.white))) {
-        ShoppingTopBar(
-            trailingIcon = {
-                Icon(
-                    painter = painterResource(R.drawable.ic_close),
-                    contentDescription = stringResource(R.string.close_icon_description),
-                    tint = colorResource(R.color.white),
-                    modifier = Modifier
-                        .size(16.dp)
-                        .noRippleClickable(onClick = onClose)
-                )
-            }
+        ShoppingTopBar(trailingIcon = { CloseIcon(onClick = onClose) })
+        ProductDetailContent(
+            uiState = uiState,
+            onAddToCart = onAddToCart,
+            onIncrease = onIncrease,
+            onDecrease = onDecrease,
+            onLastViewedClick = onLastViewedClick
         )
-        Column(modifier = Modifier.weight(1f)) {
-            ProductDetailImage(imageUrl = product.displayImageUrl())
-            ProductDetailInfo(
-                product = product,
-                uiState = uiState,
-                onIncrease = onIncrease,
-                onDecrease = onDecrease,
-                onLastViewedClick = onLastViewedClick
-            )
-        }
-        AddToCartButton(onClick = onAddToCart)
+    }
+}
+
+@Composable
+private fun CloseIcon(onClick: () -> Unit) {
+    Icon(
+        painter = painterResource(R.drawable.ic_close),
+        contentDescription = stringResource(R.string.close_icon_description),
+        tint = colorResource(R.color.white),
+        modifier = Modifier
+            .size(16.dp)
+            .noRippleClickable(onClick = onClick)
+    )
+}
+
+// 상품을 찾지 못하면(서버 미기동으로 캐시가 비었거나 없는 id 로 들어옴) 본문 자리에 안내만 두고 담기 버튼은 그리지 않는다.
+// 상단바의 닫기 버튼은 이 상태에서도 그대로 남아 있어야 화면을 빠져나갈 수 있다 (5단계 확정 사항)
+@Composable
+private fun ColumnScope.ProductDetailContent(
+    uiState: ProductDetailUiState,
+    onAddToCart: () -> Unit,
+    onIncrease: () -> Unit,
+    onDecrease: () -> Unit,
+    onLastViewedClick: (String) -> Unit
+) {
+    val product = uiState.product ?: return ProductNotFoundMessage(modifier = Modifier.weight(1f))
+    ProductDetailBody(
+        product = product,
+        uiState = uiState,
+        onIncrease = onIncrease,
+        onDecrease = onDecrease,
+        onLastViewedClick = onLastViewedClick,
+        modifier = Modifier.weight(1f)
+    )
+    AddToCartButton(onClick = onAddToCart)
+}
+
+@Composable
+private fun ProductNotFoundMessage(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(
+            text = stringResource(R.string.product_not_found_message),
+            fontSize = PRODUCT_NOT_FOUND_TEXT_SIZE,
+            color = colorResource(R.color.gray_3)
+        )
+    }
+}
+
+@Composable
+private fun ProductDetailBody(
+    product: Product,
+    uiState: ProductDetailUiState,
+    onIncrease: () -> Unit,
+    onDecrease: () -> Unit,
+    onLastViewedClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        ProductDetailImage(imageUrl = product.displayImageUrl())
+        ProductDetailInfo(
+            product = product,
+            uiState = uiState,
+            onIncrease = onIncrease,
+            onDecrease = onDecrease,
+            onLastViewedClick = onLastViewedClick
+        )
     }
 }
 
@@ -204,6 +257,21 @@ private fun ProductDetailScreenWithoutLastViewedPreview() {
     ShoppingBasketTheme {
         ProductDetailScreen(
             uiState = ProductDetailUiState(product = previewProduct("메인 상품", "https://picsum.photos/seed/main/600")),
+            onClose = {},
+            onAddToCart = {},
+            onIncrease = {},
+            onDecrease = {},
+            onLastViewedClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 780)
+@Composable
+private fun ProductDetailScreenNotFoundPreview() {
+    ShoppingBasketTheme {
+        ProductDetailScreen(
+            uiState = ProductDetailUiState(product = null),
             onClose = {},
             onAddToCart = {},
             onIncrease = {},
