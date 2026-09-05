@@ -34,6 +34,7 @@ class ProductListViewModel(
     }
 
     override fun onCleared() {
+        super.onCleared()
         cartRepository.removeChangeListener(cartChangeListener)
         recentlyViewedRepository.removeChangeListener(recentlyViewedChangeListener)
     }

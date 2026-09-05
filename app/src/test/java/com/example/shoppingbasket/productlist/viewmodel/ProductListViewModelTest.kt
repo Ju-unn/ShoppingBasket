@@ -2,6 +2,7 @@ package com.example.shoppingbasket.productlist.viewmodel
 
 import com.example.shoppingbasket.basket.model.CartRepository
 import com.example.shoppingbasket.common.fixture.ManualProductApi
+import com.example.shoppingbasket.common.fixture.clearViewModel
 import com.example.shoppingbasket.common.fixture.fakeProductRepository
 import com.example.shoppingbasket.common.fixture.fakeProductResponses
 import com.example.shoppingbasket.common.fixture.testProduct
@@ -264,5 +265,30 @@ class ProductListViewModelTest {
         manualApi.failWith()
 
         assertThat(viewModel.uiState.value.hasLoadFailed).isTrue()
+    }
+
+    // I9: onCleared() 가 하는 일(구독 해제)에 그동안 테스트가 없었다
+    @Test
+    @DisplayName("정리되면 장바구니 변경 구독을 해제해 더는 상태를 갱신하지 않는다")
+    fun clearedViewModelStopsListeningToCart() {
+        val viewModel = ProductListViewModel(cartRepository, recentlyViewedRepository, productRepository)
+        clearViewModel(viewModel)
+        val stateBefore = viewModel.uiState.value
+
+        cartRepository.add(testProduct("p1"))
+
+        assertThat(viewModel.uiState.value).isSameAs(stateBefore)
+    }
+
+    @Test
+    @DisplayName("정리되면 최근 본 상품 변경 구독을 해제해 더는 상태를 갱신하지 않는다")
+    fun clearedViewModelStopsListeningToRecentlyViewed() {
+        val viewModel = ProductListViewModel(cartRepository, recentlyViewedRepository, productRepository)
+        clearViewModel(viewModel)
+        val stateBefore = viewModel.uiState.value
+
+        recentlyViewedRepository.recordViewed(testProduct("p1"))
+
+        assertThat(viewModel.uiState.value).isSameAs(stateBefore)
     }
 }

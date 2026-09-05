@@ -2,6 +2,7 @@ package com.example.shoppingbasket.productdetail.viewmodel
 
 import com.example.shoppingbasket.basket.model.CartRepository
 import com.example.shoppingbasket.common.fixture.fakeProductRepository
+import com.example.shoppingbasket.productlist.viewmodel.ProductListViewModel
 import com.example.shoppingbasket.recentlyviewed.model.RecentlyViewedRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
@@ -83,12 +84,25 @@ class ProductDetailViewModelTest {
         assertThat(cartRepository.findAll().items()).isEmpty()
     }
 
+    // 기록 시점이 "생성" 에서 "화면 진입 알림" 으로 옮겨졌다 (I8). 컴포지션이 끝난 뒤 View 가 불러 준다
     @Test
-    @DisplayName("진입 즉시 최근 본 상품으로 기록된다")
-    fun recordsProductAsRecentlyViewedOnCreate() {
-        ProductDetailViewModel("p1", cartRepository, recentlyViewedRepository, productRepository)
+    @DisplayName("화면 진입을 알리면 최근 본 상품으로 기록된다")
+    fun recordsProductAsRecentlyViewedOnScreenEntered() {
+        val viewModel = ProductDetailViewModel("p1", cartRepository, recentlyViewedRepository, productRepository)
+
+        viewModel.onScreenEntered()
 
         assertThat(recentlyViewedRepository.findAll().items().map { product -> product.key() }).containsExactly("p1")
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 상품이면 화면 진입을 알려도 기록하지 않는다")
+    fun doesNotRecordMissingProductOnScreenEntered() {
+        val viewModel = ProductDetailViewModel("없는id", cartRepository, recentlyViewedRepository, productRepository)
+
+        viewModel.onScreenEntered()
+
+        assertThat(recentlyViewedRepository.findAll().isEmpty()).isTrue()
     }
 
     @Test
@@ -102,10 +116,24 @@ class ProductDetailViewModelTest {
     @Test
     @DisplayName("이전에 다른 상품을 봤다면 자기 자신을 제외한 마지막 상품이 상태에 담긴다")
     fun exposesLastViewedProductExcludingSelf() {
-        ProductDetailViewModel("p2", cartRepository, recentlyViewedRepository, productRepository)
+        ProductDetailViewModel("p2", cartRepository, recentlyViewedRepository, productRepository).onScreenEntered()
 
         val viewModel = ProductDetailViewModel("p1", cartRepository, recentlyViewedRepository, productRepository)
 
         assertThat(viewModel.uiState.value.lastViewedProduct?.key()).isEqualTo("p2")
+    }
+
+    // I8: 상세 ViewModel 은 컴포지션 도중(viewModel() 호출 시점) 생성된다.
+    // 생성 과정에서 최근 본 상품을 기록하면 그 알림이 목록 ViewModel 의 Compose 상태를 바꾼다.
+    // 컴포지션 도중의 상태 쓰기는 Compose 가 금지하는 동작이라, 생성만으로는 아무 상태도 바뀌지 않아야 한다.
+    @Test
+    @DisplayName("상세 ViewModel 을 만드는 것만으로는 목록 화면 상태가 바뀌지 않는다")
+    fun creationDoesNotChangeProductListState() {
+        val listViewModel = ProductListViewModel(cartRepository, recentlyViewedRepository, productRepository)
+        val stateBefore = listViewModel.uiState.value
+
+        ProductDetailViewModel("p1", cartRepository, recentlyViewedRepository, productRepository)
+
+        assertThat(listViewModel.uiState.value).isSameAs(stateBefore)
     }
 }

@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
@@ -91,6 +92,11 @@ private fun ProductDetailRoute(productId: String, navController: NavHostControll
             initializer { ProductDetailViewModel(productId, cartRepository(), recentlyViewedRepository(), productRepository()) }
         }
     )
+    // 최근 본 상품 기록은 컴포지션 도중에 하면 목록 화면의 Compose 상태를 건드리게 된다.
+    // 그래서 컴포지션이 끝난 뒤 이 효과에서 한 번만 알린다 (5단계 I8)
+    LaunchedEffect(productId) {
+        viewModel.onScreenEntered()
+    }
     val uiState by viewModel.uiState
     ProductDetailScreen(
         uiState = uiState,

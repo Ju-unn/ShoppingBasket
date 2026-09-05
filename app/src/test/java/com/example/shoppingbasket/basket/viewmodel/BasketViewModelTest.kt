@@ -1,6 +1,7 @@
 package com.example.shoppingbasket.basket.viewmodel
 
 import com.example.shoppingbasket.basket.model.CartRepository
+import com.example.shoppingbasket.common.fixture.clearViewModel
 import com.example.shoppingbasket.common.fixture.testProduct
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
@@ -172,5 +173,18 @@ class BasketViewModelTest {
 
     private fun addProducts(count: Int) {
         (1..count).forEach { number -> cartRepository.add(testProduct("p$number")) }
+    }
+
+    // I9: onCleared() 가 하는 일(구독 해제)에 그동안 테스트가 없었다
+    @Test
+    @DisplayName("정리되면 장바구니 변경 구독을 해제해 더는 상태를 갱신하지 않는다")
+    fun clearedViewModelStopsListeningToCart() {
+        val viewModel = BasketViewModel(cartRepository)
+        clearViewModel(viewModel)
+        val stateBefore = viewModel.uiState.value
+
+        cartRepository.add(testProduct("p1"))
+
+        assertThat(viewModel.uiState.value).isSameAs(stateBefore)
     }
 }
