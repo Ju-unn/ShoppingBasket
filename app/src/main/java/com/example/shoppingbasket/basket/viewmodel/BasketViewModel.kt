@@ -22,6 +22,7 @@ class BasketViewModel(private val cartRepository: CartRepository) : ViewModel() 
     }
 
     override fun onCleared() {
+        super.onCleared()
         cartRepository.removeChangeListener(cartChangeListener)
     }
 

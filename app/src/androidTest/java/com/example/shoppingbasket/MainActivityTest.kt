@@ -19,6 +19,9 @@ class MainActivityTest {
     // 서버 MockProducts 의 p1 값과 동일해야 한다 (4단계 결정 5번 — 생성 규칙이 서버 쪽으로 옮겨가 더는 앱에서 계산할 수 없다)
     private val firstProductName = "PET보틀-밀크티병(300ml)"
 
+    // 서버 MockProducts 의 p2 값
+    private val secondProductName = "PET보틀-납작(2000ml)"
+
     @Before
     fun clearSharedRepositories() {
         // 장바구니/최근 본 상품 저장소는 Application 수명이라 같은 프로세스의 앞선 테스트 결과가 남는다
@@ -63,6 +66,19 @@ class MainActivityTest {
         composeTestRule.onNodeWithContentDescription("장바구니").performClick()
 
         composeTestRule.onNodeWithText("Cart").assertExists()
+        composeTestRule.onNodeWithText(firstProductName).assertExists()
+    }
+
+    // 최근 본 상품 기록은 ViewModel 생성이 아니라 화면 진입 알림(LaunchedEffect)으로 일어난다 (5단계 I8).
+    // View 가 그 알림을 빠뜨리면 이 경로가 통째로 죽으므로 화면으로 직접 확인한다
+    @Test
+    fun showsPreviouslyViewedProductOnAnotherProductDetail() {
+        composeTestRule.onNodeWithText(firstProductName).performClick()
+        composeTestRule.onNodeWithContentDescription("닫기").performClick()
+
+        composeTestRule.onNodeWithText(secondProductName).performClick()
+
+        composeTestRule.onNodeWithText("마지막으로 본 상품").assertExists()
         composeTestRule.onNodeWithText(firstProductName).assertExists()
     }
 }
